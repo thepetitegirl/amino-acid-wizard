@@ -19,6 +19,10 @@ Open `index.html` in any browser — no installation or setup needed.
 
 Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartic Acid, Lysine, Methionine, Valine, Leucine, Isoleucine, Threonine, Tyrosine, Asparagine, Glutamine, Glutamic Acid, Arginine, Histidine
 
+## Last updated
+
+2026-03-22 — 3 game modes: Flashcards for studying, Quiz for multiple choice practice, and Lab Explorer — a 2D map game where you open chests to unlock amino acid challenges. All modes support user vs bot play.
+
 ## Run locally
 
 ```bash
