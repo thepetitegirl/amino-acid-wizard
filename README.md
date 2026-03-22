@@ -19,6 +19,9 @@ Open `index.html` in any browser — no installation or setup needed.
 
 Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartic Acid, Lysine, Methionine, Valine, Leucine, Isoleucine, Threonine, Tyrosine, Asparagine, Glutamine, Glutamic Acid, Arginine, Histidine
 
-## Live demo
+## Run locally
 
-https://thepetitegirl.github.io/amino-acid-wizard/
+```bash
+git clone https://github.com/thepetitegirl/amino-acid-wizard.git
+open amino-acid-wizard/index.html
+```
