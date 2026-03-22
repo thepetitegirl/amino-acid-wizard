@@ -1,0 +1,3322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AminoQuest — Learn Amino Acids Through Games</title>
+  <style>
+    /* ================================================================
+       CSS VARIABLES — change these to retheme the entire app
+       ================================================================ */
+    :root {
+      --bg:         #0f172a;
+      --surface:    #1e293b;
+      --card:       #334155;
+      --border:     #475569;
+      --text:       #f1f5f9;
+      --muted:      #94a3b8;
+      --primary:    #6366f1;
+      --primary-h:  #4f46e5;
+      --success:    #22c55e;
+      --danger:     #ef4444;
+      --warning:    #f59e0b;
+      /* Amino acid category colours */
+      --nonpolar:   #fb923c;
+      --polar:      #34d399;
+      --positive:   #60a5fa;
+      --negative:   #f87171;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* ================================================================
+       SCREEN SYSTEM
+       ================================================================ */
+    .screen { display: none; }
+    .screen.active { display: block; }
+    #screen-home.active,
+    #screen-results.active {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem;
+      text-align: center;
+    }
+
+    /* ================================================================
+       HOME SCREEN
+       ================================================================ */
+    .logo        { font-size: 4rem; margin-bottom: 1rem; }
+    .game-title  {
+      font-size: 3rem; font-weight: 800;
+      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; margin-bottom: 0.5rem;
+    }
+    .game-subtitle { font-size: 1.2rem; color: var(--muted); margin-bottom: 2.5rem; }
+
+    .home-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 1rem; padding: 2rem; width: 100%; max-width: 400px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    label {
+      display: block; font-size: 0.8rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.06em;
+      color: var(--muted); margin-bottom: 0.5rem;
+    }
+    input[type="text"] {
+      width: 100%; padding: 0.75rem 1rem;
+      background: var(--bg); border: 1px solid var(--border);
+      border-radius: 0.5rem; color: var(--text); font-size: 1rem;
+      margin-bottom: 1.25rem; outline: none; transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { border-color: var(--primary); }
+
+    /* ================================================================
+       BUTTONS
+       ================================================================ */
+    .btn {
+      padding: 0.75rem 1.5rem; border: none; border-radius: 0.5rem;
+      font-size: 0.95rem; font-weight: 600; cursor: pointer;
+      transition: all 0.2s; display: inline-flex; align-items: center; gap: 0.4rem;
+    }
+    .btn-primary {
+      background: var(--primary); color: white;
+      width: 100%; justify-content: center; font-size: 1.1rem; padding: 0.875rem;
+    }
+    .btn-primary:hover { background: var(--primary-h); transform: translateY(-1px); }
+    .btn-secondary {
+      background: var(--surface); color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { background: var(--card); }
+
+    /* ================================================================
+       SHARED GAME HEADER (score bar)
+       ================================================================ */
+    .game-header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0.875rem 1.5rem; display: flex;
+      align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .score-row { display: flex; align-items: center; gap: 1.25rem; }
+    .score-block { text-align: center; }
+    .score-name  { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .score-val   { font-size: 2rem; font-weight: 800; color: var(--primary); }
+    .score-vs    { font-size: 1.1rem; font-weight: 700; color: var(--muted); }
+
+    /* ================================================================
+       CONTAINER
+       ================================================================ */
+    .container { max-width: 1080px; margin: 0 auto; padding: 1.5rem; }
+
+    /* ================================================================
+       GAME SELECT
+       ================================================================ */
+    .game-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem; margin-top: 2rem;
+    }
+    .game-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 1rem; padding: 2rem; cursor: pointer;
+      transition: all 0.2s; text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .game-card:hover {
+      border-color: var(--primary); transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(99,102,241,0.2);
+    }
+    .game-icon  { font-size: 3rem; margin-bottom: 1rem; }
+    .game-name  { font-size: 1.4rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .game-desc  { color: var(--muted); font-size: 0.9rem; line-height: 1.6; }
+    .game-pts   { margin-top: 0.875rem; font-size: 0.8rem; color: var(--primary); font-weight: 600; }
+
+    /* Category legend */
+    .legend { display: flex; flex-wrap: wrap; gap: 0.75rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; font-size: 0.8rem; }
+    .legend-dot  { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ================================================================
+       MATCHING / MEMORY GAME
+       ================================================================ */
+    .instruction-box {
+      background: rgba(99,102,241,0.08); border: 1px solid rgba(99,102,241,0.3);
+      border-radius: 0.5rem; padding: 0.75rem 1rem;
+      font-size: 0.875rem; color: var(--muted); margin-bottom: 1rem;
+    }
+    .mg-stats { display: flex; gap: 1.5rem; padding: 0.5rem 0 0.75rem; flex-wrap: wrap; align-items: center; }
+    .stat-item { display: flex; flex-direction: column; align-items: center; }
+    .stat-label { font-size: 0.68rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .stat-val   { font-size: 1.4rem; font-weight: 800; }
+
+    /* Turn indicator badge */
+    .turn-badge {
+      padding: 0.35rem 0.9rem; border-radius: 999px;
+      font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em;
+      margin-left: auto;
+    }
+    .turn-badge.player-turn {
+      background: rgba(99,102,241,0.2); border: 1px solid rgba(99,102,241,0.5); color: #a5b4fc;
+    }
+    .turn-badge.bot-turn {
+      background: rgba(239,68,68,0.2); border: 1px solid rgba(239,68,68,0.5); color: #fca5a5;
+    }
+
+    /* ----------------------------------------------------------------
+       FLIP-CARD MEMORY GRID
+       ---------------------------------------------------------------- */
+    .memory-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0.875rem;
+      margin-top: 1rem;
+    }
+
+    /* The outer wrapper — perspective for 3D effect */
+    .mem-card-wrap {
+      perspective: 900px;
+      height: 130px;
+      cursor: pointer;
+    }
+    .mem-card-wrap.no-click { cursor: default; }
+
+    /* The inner element that actually rotates */
+    .mem-card-inner {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      transform-style: preserve-3d;
+      transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    }
+    .mem-card-wrap.is-flipped .mem-card-inner {
+      transform: rotateY(180deg);
+    }
+
+    /* Shared face styles */
+    .mem-face {
+      position: absolute; inset: 0;
+      border-radius: 0.75rem;
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      border: 2px solid var(--border);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+      overflow: hidden;
+      padding: 0.5rem;
+    }
+
+    /* BACK face — visible by default */
+    .mem-back {
+      background: var(--surface);
+    }
+    .mem-back.back-name {
+      background: linear-gradient(135deg, #1e2d4a 0%, #1e293b 100%);
+      border-color: #3b5280;
+    }
+    .mem-back.back-struct {
+      background: linear-gradient(135deg, #2d1e10 0%, #1e293b 100%);
+      border-color: #6b3d18;
+    }
+    .mem-back-label {
+      font-size: 0.65rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+    .back-name   .mem-back-label { color: #7ba3e0; }
+    .back-struct .mem-back-label { color: #e0a97b; }
+    .mem-back-icon { font-size: 1.6rem; margin-bottom: 0.25rem; }
+
+    /* FRONT face — shown when flipped */
+    .mem-front {
+      background: var(--card);
+      transform: rotateY(180deg);
+    }
+    .mem-front.front-name {
+      background: linear-gradient(135deg, #1a2036 0%, #1e293b 100%);
+    }
+    .mem-front.front-struct {
+      background: #161f2e;
+    }
+
+    /* Name-card front content */
+    .mem-name-text {
+      font-size: 1.05rem;
+      font-weight: 700;
+      text-align: center;
+      line-height: 1.2;
+      margin-bottom: 0.25rem;
+    }
+    .mem-abbr {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.25rem;
+    }
+    .mem-cat-tag {
+      font-size: 0.62rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.07em;
+      padding: 0.15rem 0.5rem;
+      border-radius: 999px;
+    }
+    .cat-tag-nonpolar { color: var(--nonpolar); background: rgba(251,146,60,0.12); border: 1px solid rgba(251,146,60,0.3); }
+    .cat-tag-polar    { color: var(--polar);    background: rgba(52,211,153,0.12); border: 1px solid rgba(52,211,153,0.3); }
+    .cat-tag-positive { color: var(--positive); background: rgba(96,165,250,0.12); border: 1px solid rgba(96,165,250,0.3); }
+    .cat-tag-negative { color: var(--negative); background: rgba(248,113,113,0.12); border: 1px solid rgba(248,113,113,0.3); }
+
+    /* Structure-card front content */
+    .mem-svg-wrap {
+      width: 100%;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .mem-svg-wrap svg {
+      width: 100%;
+      height: 100%;
+      max-height: 80px;
+    }
+    .mem-struct-label {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 0.15rem;
+    }
+
+    /* Locked (matched) card styling */
+    .mem-card-wrap.locked .mem-face {
+      border-color: var(--success);
+      box-shadow: 0 0 20px rgba(34,197,94,0.25), 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .mem-card-wrap.locked { cursor: default; }
+
+    /* ================================================================
+       BOT STATUS BAR
+       ================================================================ */
+    .bot-bar {
+      display: flex; align-items: center; gap: 0.75rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.5rem; padding: 0.75rem 1rem;
+      margin-top: 1rem; font-size: 0.875rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .bot-avatar { font-size: 1.5rem; }
+    .bot-name   { font-weight: 700; font-size: 0.875rem; }
+    .bot-msg    { color: var(--muted); }
+    .thinking   { display: flex; align-items: center; gap: 4px; margin-left: auto; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); animation: bounce 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes bounce {
+      0%,80%,100% { transform: translateY(0); }
+      40%          { transform: translateY(-6px); }
+    }
+
+    /* ================================================================
+       QUIZ GAME
+       ================================================================ */
+    .quiz-wrap { max-width: 680px; margin: 1.5rem auto; }
+    .quiz-meta {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 0.75rem; font-size: 0.875rem; color: var(--muted);
+    }
+    .timer-bar  { width: 100%; height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; margin-bottom: 1.25rem; }
+    .timer-fill { height: 100%; border-radius: 3px; background: var(--primary); transition: width 1s linear, background 0.5s; }
+    .timer-fill.urgent { background: var(--danger); }
+
+    .quiz-q {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.875rem; padding: 1.75rem; margin-bottom: 1.25rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .q-label { font-size: 0.72rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--primary); margin-bottom: 0.6rem; }
+    .q-text  { font-size: 1.15rem; font-weight: 600; line-height: 1.5; }
+
+    .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    .opt-btn {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 0.625rem; padding: 0.875rem 1rem;
+      color: var(--text); font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; text-align: left; line-height: 1.4;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .opt-btn:hover:not(:disabled) { border-color: var(--primary); background: var(--card); }
+    .opt-btn.correct { border-color: var(--success); background: rgba(34,197,94,0.12); color: var(--success); }
+    .opt-btn.wrong   { border-color: var(--danger);  background: rgba(239,68,68,0.12);  color: var(--danger); }
+    .opt-btn:disabled { cursor: default; }
+
+    .feedback-box {
+      border-radius: 0.5rem; padding: 1rem; margin-top: 1rem;
+      font-size: 0.9rem; line-height: 1.55; display: none;
+    }
+    .feedback-box.correct-fb {
+      background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.3);
+    }
+    .feedback-box.wrong-fb {
+      background: rgba(239,68,68,0.08); border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    /* ================================================================
+       RESULTS SCREEN
+       ================================================================ */
+    .result-trophy   { font-size: 5rem; margin-bottom: 1rem; }
+    .result-title    { font-size: 2.25rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .result-subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 2rem; }
+
+    .result-scores { display: flex; gap: 1.5rem; justify-content: center; margin-bottom: 2rem; flex-wrap: wrap; }
+    .result-score-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.875rem; padding: 1.25rem 2rem; min-width: 140px; text-align: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .result-score-card.winner {
+      border-color: var(--warning); box-shadow: 0 0 20px rgba(245,158,11,0.2);
+    }
+    .result-score-val  { font-size: 2.25rem; font-weight: 800; color: var(--primary); }
+    .result-score-name { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+
+    .result-breakdown {
+      max-width: 380px; width: 100%;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.75rem; padding: 1.25rem;
+      font-size: 0.875rem; text-align: left; margin-bottom: 1.5rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+    .result-breakdown p { margin-bottom: 0.4rem; }
+
+    .ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; font-size: 0.78rem; text-align: left; max-width: 540px; width: 100%; }
+    .ref-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.4rem; padding: 0.4rem 0.6rem;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.06);
+    }
+
+    /* ================================================================
+       TOAST
+       ================================================================ */
+    #toast {
+      position: fixed; top: 1.25rem; right: 1.25rem;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.625rem; padding: 0.875rem 1.1rem;
+      font-size: 0.875rem; font-weight: 500;
+      transform: translateX(130%); transition: transform 0.3s ease;
+      z-index: 1000; max-width: 300px;
+    }
+    #toast.show    { transform: translateX(0); }
+    #toast.success { border-color: var(--success); color: var(--success); }
+    #toast.error   { border-color: var(--danger);  color: var(--danger); }
+    #toast.info    { border-color: var(--primary);  color: var(--primary); }
+
+    /* ================================================================
+       UTILITIES
+       ================================================================ */
+    .mt-1 { margin-top: 0.5rem; }
+    .mt-2 { margin-top: 1rem; }
+    .mt-3 { margin-top: 1.5rem; }
+    .muted { color: var(--muted); }
+
+    @media (max-width: 700px) {
+      .memory-grid { grid-template-columns: repeat(3, 1fr); }
+      .mem-card-wrap { height: 110px; }
+      .options-grid { grid-template-columns: 1fr; }
+      .game-title  { font-size: 2rem; }
+    }
+    @media (max-width: 460px) {
+      .memory-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ================================================================
+       LAB EXPLORER GAME
+       ================================================================ */
+    .explorer-wrap {
+      display: flex; gap: 1rem; padding: 1rem;
+      align-items: flex-start; flex-wrap: wrap;
+    }
+    .canvas-container {
+      position: relative; flex-shrink: 0;
+      border-radius: 0.75rem; overflow: hidden;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+      border: 2px solid var(--border);
+      max-width: 100%;
+    }
+    #explorer-canvas { display: block; max-width: 100%; height: auto; }
+
+    /* Interaction hint bar */
+    .interact-hint {
+      position: absolute; bottom: 0; left: 0; right: 0;
+      background: rgba(15,23,42,0.88); backdrop-filter: blur(4px);
+      padding: 0.6rem 1rem; text-align: center;
+      font-size: 0.875rem; font-weight: 600; color: var(--text);
+      border-top: 1px solid var(--border);
+    }
+    .interact-hint kbd {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 4px; padding: 1px 6px; font-size: 0.8rem;
+    }
+
+    /* Chest question overlay */
+    .chest-q-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.75); backdrop-filter: blur(3px);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 10;
+    }
+    .chest-q-box {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 1rem; padding: 1.75rem; max-width: 480px; width: 90%;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+    }
+    .chest-q-label {
+      font-size: 0.75rem; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: var(--warning); margin-bottom: 0.6rem;
+    }
+    .chest-q-text {
+      font-size: 1.05rem; font-weight: 600; line-height: 1.5; margin-bottom: 1.1rem;
+    }
+    .chest-q-options { display: flex; flex-direction: column; gap: 0.5rem; }
+    .cq-opt {
+      background: var(--card); border: 2px solid var(--border);
+      border-radius: 0.5rem; padding: 0.75rem 1rem;
+      color: var(--text); font-size: 0.9rem; font-weight: 500;
+      cursor: pointer; transition: all 0.18s; text-align: left;
+    }
+    .cq-opt:hover:not(:disabled) { border-color: var(--primary); background: var(--surface); }
+    .cq-opt.correct { border-color: var(--success); background: rgba(34,197,94,0.12); color: var(--success); }
+    .cq-opt.wrong   { border-color: var(--danger);  background: rgba(239,68,68,0.12);  color: var(--danger);  }
+    .cq-opt:disabled { cursor: default; }
+    .chest-q-feedback {
+      margin-top: 0.875rem; padding: 0.875rem; border-radius: 0.4rem;
+      font-size: 0.85rem; line-height: 1.5;
+    }
+
+    /* Victory overlay */
+    .explorer-victory {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.85);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 20;
+    }
+    .victory-box {
+      background: var(--surface); border: 2px solid var(--warning);
+      border-radius: 1rem; padding: 2.5rem; text-align: center;
+      box-shadow: 0 0 40px rgba(245,158,11,0.3);
+    }
+    .victory-box h2 { font-size: 1.75rem; font-weight: 800; margin: 0.5rem 0; }
+    .victory-box p  { color: var(--muted); }
+
+    /* Collection sidebar */
+    .collection-sidebar {
+      flex: 1; min-width: 220px; max-width: 300px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 0.75rem; padding: 1rem; max-height: 490px; overflow-y: auto;
+    }
+    .coll-header {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.875rem; font-weight: 700; margin-bottom: 0.75rem;
+      padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+    }
+    .coll-grid { display: flex; flex-direction: column; gap: 0.4rem; }
+    .coll-slot {
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 0.4rem; padding: 0.5rem 0.625rem;
+      font-size: 0.78rem; transition: all 0.3s;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .coll-slot.locked   { opacity: 0.4; }
+    .coll-slot.unlocked { border-color: var(--success); opacity: 1; background: rgba(34,197,94,0.08); }
+    .coll-slot.unlocked.pop { animation: popIn 0.4s ease; }
+    .coll-slot-icon  { font-size: 1.1rem; width: 22px; text-align: center; flex-shrink: 0; }
+    .coll-slot-name  { font-weight: 700; }
+    .coll-slot-cat   { font-size: 0.68rem; }
+    .coll-hint       { margin-top: 0.75rem; font-size: 0.75rem; color: var(--muted); text-align: center; line-height: 1.4; }
+
+    @keyframes popIn {
+      0%   { transform: scale(0.85); }
+      50%  { transform: scale(1.06); }
+      100% { transform: scale(1); }
+    }
+
+    /* Structure identifier challenge */
+    .sc-opts {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.625rem; margin-bottom: 0.75rem;
+    }
+    .sc-opt {
+      background: var(--card); border: 2px solid var(--border); border-radius: 0.625rem;
+      padding: 0.6rem; cursor: pointer; transition: all 0.2s; text-align: center;
+    }
+    .sc-opt:hover { border-color: var(--primary); background: var(--surface); }
+    .sc-opt-name { font-size: 0.75rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--muted); }
+    .sc-opt svg  { width: 100%; max-width: 110px; height: 68px; }
+    .sc-opt.sc-correct { border-color: var(--success) !important; background: rgba(34,197,94,0.1) !important; }
+    .sc-opt.sc-wrong   { border-color: var(--danger)  !important; background: rgba(239,68,68,0.1)  !important; }
+
+    /* Difficulty badge on chests (shown in interact hint) */
+    .diff-easy   { color: #86efac; }
+    .diff-medium { color: #93c5fd; }
+    .diff-hard   { color: #f0abfc; }
+
+    @media (max-width: 720px) {
+      .explorer-wrap { flex-direction: column; }
+      .collection-sidebar { max-width: 100%; max-height: 200px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- ================================================================
+     TOAST NOTIFICATION
+     ================================================================ -->
+<div id="toast"></div>
+
+<!-- ================================================================
+     SCREEN 1 — HOME
+     ================================================================ -->
+<div id="screen-home" class="screen active">
+  <div class="logo">🧬</div>
+  <h1 class="game-title">AminoQuest</h1>
+  <p class="game-subtitle">Learn amino acids through competitive mini-games</p>
+
+  <div class="home-card">
+    <label for="player-name">Your Name</label>
+    <input type="text" id="player-name" placeholder="Enter your name…" maxlength="20" />
+    <button class="btn btn-primary" onclick="startSession()">Play vs BioBot ›</button>
+    <p class="muted mt-2" style="font-size:0.78rem; text-align:center;">Scores carry across rounds — beat BioBot in both games!</p>
+  </div>
+
+  <div style="margin-top:2rem; max-width:480px; text-align:left;">
+    <p class="muted" style="font-weight:700; font-size:0.85rem; margin-bottom:0.75rem;">WHAT YOU WILL LEARN</p>
+    <div style="display:flex; flex-direction:column; gap:0.4rem; font-size:0.875rem; color:var(--muted);">
+      <div>🔬 Names, 3-letter &amp; 1-letter codes for 10 amino acids</div>
+      <div>⚗️ Categories: nonpolar, polar, positively/negatively charged</div>
+      <div>🧪 The unique biological role of each amino acid</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 2 — GAME SELECT
+     ================================================================ -->
+<div id="screen-game-select" class="screen">
+  <div class="game-header">
+    <div>
+      <div id="gs-welcome" style="font-weight:700;"></div>
+      <div class="muted" style="font-size:0.75rem;">Choose a game</div>
+    </div>
+    <div class="score-row">
+      <div class="score-block">
+        <div class="score-name" id="gs-pname">Player</div>
+        <div class="score-val"  id="gs-pscore">0</div>
+      </div>
+      <div class="score-vs">VS</div>
+      <div class="score-block">
+        <div class="score-name">BioBot</div>
+        <div class="score-val" id="gs-bscore">0</div>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="goHome()">← Home</button>
+  </div>
+
+  <div class="container">
+    <div class="game-grid">
+      <div class="game-card" onclick="startMatchingGame()">
+        <div class="game-icon">🃏</div>
+        <div class="game-name">Memory Match</div>
+        <div class="game-desc">
+          Flip cards to find matching amino acid name + structure pairs.
+          Alternate turns with BioBot — remember where cards are!
+        </div>
+        <div class="game-pts">+10 pts correct pair · No penalty for mismatches</div>
+      </div>
+      <div class="game-card" onclick="startQuizGame()">
+        <div class="game-icon">🧠</div>
+        <div class="game-name">Quiz Challenge</div>
+        <div class="game-desc">
+          10 rapid-fire multiple choice questions about amino acids.
+          Answer before the 20-second timer — and before BioBot!
+        </div>
+        <div class="game-pts">+10 pts correct · up to +5 time bonus</div>
+      </div>
+      <div class="game-card" onclick="startExplorer()">
+        <div class="game-icon">🗺️</div>
+        <div class="game-name">Lab Explorer</div>
+        <div class="game-desc">
+          Explore a laboratory dungeon with arrow keys. Find chests, answer questions about the amino acid inside, and build your collection!
+        </div>
+        <div class="game-pts">+15 pts correct answer · collect all 10 amino acids</div>
+      </div>
+    </div>
+
+    <!-- Category reference legend -->
+    <div style="margin-top:2rem; background:var(--surface); border:1px solid var(--border); border-radius:0.75rem; padding:1.25rem; box-shadow:0 4px 16px rgba(0,0,0,0.4),inset 0 1px 0 rgba(255,255,255,0.06);">
+      <p style="font-size:0.85rem; font-weight:700; margin-bottom:0.75rem;">AMINO ACID CATEGORY GUIDE</p>
+      <div class="legend">
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--nonpolar)"></div>
+          <span style="color:var(--nonpolar); font-weight:600;">Nonpolar</span>
+          <span class="muted">— hydrophobic; hide inside proteins</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--polar)"></div>
+          <span style="color:var(--polar); font-weight:600;">Polar Uncharged</span>
+          <span class="muted">— interact with water; often on protein surface</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--positive)"></div>
+          <span style="color:var(--positive); font-weight:600;">Positively Charged</span>
+          <span class="muted">— carry a + charge at body pH</span>
+        </div>
+        <div class="legend-item">
+          <div class="legend-dot" style="background:var(--negative)"></div>
+          <span style="color:var(--negative); font-weight:600;">Negatively Charged</span>
+          <span class="muted">— carry a − charge at body pH</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 3 — MATCHING / MEMORY GAME
+     ================================================================ -->
+<div id="screen-matching" class="screen">
+  <div class="game-header">
+    <div>
+      <div style="font-weight:700;">🃏 Memory Match</div>
+      <div class="muted" style="font-size:0.75rem;">Flip cards to find name + structure pairs</div>
+    </div>
+    <div class="score-row">
+      <div class="score-block">
+        <div class="score-name" id="mg-pname">Player</div>
+        <div class="score-val"  id="mg-pscore">0</div>
+      </div>
+      <div class="score-vs">VS</div>
+      <div class="score-block">
+        <div class="score-name">BioBot</div>
+        <div class="score-val" id="mg-bscore">0</div>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="exitToMenu()">← Menu</button>
+  </div>
+
+  <div class="container">
+    <div class="instruction-box">
+      <strong>How to play:</strong> Click any card to flip it. Find a matching
+      <em>name card</em> + <em>structure card</em> for the same amino acid.
+      Match = <strong style="color:var(--success)">+10 pts</strong> and you go again.
+      No match = cards flip back and BioBot takes a turn.
+    </div>
+
+    <div class="mg-stats">
+      <div class="stat-item">
+        <div class="stat-label">Pairs Found</div>
+        <div class="stat-val" id="mg-matched">0 / 6</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Your Matches</div>
+        <div class="stat-val" style="color:var(--success)" id="mg-pcorrect">0</div>
+      </div>
+      <div class="stat-item">
+        <div class="stat-label">Bot Matches</div>
+        <div class="stat-val" style="color:var(--danger)" id="mg-bcorrect">0</div>
+      </div>
+      <div id="mg-turn-badge" class="turn-badge player-turn">Your Turn</div>
+    </div>
+
+    <!-- 4×3 memory grid populated by JS -->
+    <div class="memory-grid" id="memory-grid"></div>
+
+    <div class="bot-bar">
+      <div class="bot-avatar">🤖</div>
+      <div>
+        <div class="bot-name">BioBot</div>
+        <div class="bot-msg" id="bot-msg-mg">Studying the cards…</div>
+      </div>
+      <div class="thinking" id="thinking-mg" style="display:none;">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 4 — QUIZ GAME
+     ================================================================ -->
+<div id="screen-quiz" class="screen">
+  <div class="game-header">
+    <div>
+      <div style="font-weight:700;">🧠 Quiz Challenge</div>
+      <div class="muted" style="font-size:0.75rem;" id="qz-header-label">Question 1 of 10</div>
+    </div>
+    <div class="score-row">
+      <div class="score-block">
+        <div class="score-name" id="qz-pname">Player</div>
+        <div class="score-val"  id="qz-pscore">0</div>
+      </div>
+      <div class="score-vs">VS</div>
+      <div class="score-block">
+        <div class="score-name">BioBot</div>
+        <div class="score-val" id="qz-bscore">0</div>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="exitToMenu()">← Menu</button>
+  </div>
+
+  <div class="container">
+    <div class="quiz-wrap">
+      <div class="quiz-meta">
+        <span id="qz-q-label">Question 1 of 10</span>
+        <span id="qz-timer-label">⏱ 20s</span>
+      </div>
+      <div class="timer-bar">
+        <div class="timer-fill" id="qz-timer-fill" style="width:100%"></div>
+      </div>
+
+      <div class="quiz-q">
+        <div class="q-label">Question</div>
+        <div class="q-text" id="qz-question"></div>
+      </div>
+
+      <div class="options-grid" id="qz-options"></div>
+
+      <div class="feedback-box" id="qz-feedback"></div>
+
+      <div class="bot-bar mt-2">
+        <div class="bot-avatar">🤖</div>
+        <div style="flex:1">
+          <div class="bot-name">BioBot</div>
+          <div class="bot-msg" id="bot-msg-qz">Ready…</div>
+        </div>
+        <div class="thinking" id="thinking-qz" style="display:none;">
+          <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+        </div>
+      </div>
+
+      <button id="qz-next-btn" class="btn btn-primary mt-2" onclick="nextQuestion()" style="display:none;">
+        Next Question →
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     SCREEN 5 — RESULTS
+     ================================================================ -->
+<div id="screen-results" class="screen">
+  <div id="result-trophy" class="result-trophy">🏆</div>
+  <div id="result-title"  class="result-title">Well played!</div>
+  <div id="result-sub"    class="result-subtitle"></div>
+
+  <div class="result-scores">
+    <div class="result-score-card" id="r-player-card">
+      <div class="result-score-val"  id="r-pscore">0</div>
+      <div class="result-score-name" id="r-pname">Player</div>
+    </div>
+    <div class="result-score-card" id="r-bot-card">
+      <div class="result-score-val"  id="r-bscore">0</div>
+      <div class="result-score-name">BioBot</div>
+    </div>
+  </div>
+
+  <div class="result-breakdown" id="r-breakdown"></div>
+
+  <div style="display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; margin-bottom:2rem;">
+    <button class="btn btn-primary"    onclick="exitToMenu()">Play Again</button>
+    <button class="btn btn-secondary"  onclick="goHome()">← Home</button>
+  </div>
+
+  <p class="muted" style="font-size:0.8rem; font-weight:700; margin-bottom:0.75rem;">QUICK REFERENCE — ALL 10 AMINO ACIDS</p>
+  <div class="ref-grid" id="r-ref"></div>
+</div>
+
+<!-- ================================================================
+     SCREEN 6 — LAB EXPLORER
+     ================================================================ -->
+<div id="screen-explorer" class="screen">
+  <div class="game-header">
+    <div>
+      <div style="font-weight:700;">🗺️ Lab Explorer</div>
+      <div class="muted" style="font-size:0.75rem;">Explore and collect all 10 amino acids</div>
+    </div>
+    <div class="score-row">
+      <div class="score-block">
+        <div class="score-name" id="ex-pname">Player</div>
+        <div class="score-val"  id="ex-pscore">0</div>
+      </div>
+      <div class="score-vs">VS</div>
+      <div class="score-block">
+        <div class="score-name">BioBot</div>
+        <div class="score-val" id="ex-bscore">0</div>
+      </div>
+    </div>
+    <button class="btn btn-secondary" onclick="exitToMenu()">← Menu</button>
+  </div>
+  <div class="explorer-wrap">
+    <div class="canvas-container">
+      <canvas id="explorer-canvas" width="640" height="480"></canvas>
+      <!-- Interaction hint shown when player is adjacent to a chest -->
+      <div id="interact-hint" class="interact-hint" style="display:none">
+        Press <kbd>E</kbd> or <kbd>Space</kbd> to open chest
+      </div>
+      <!-- Question overlay shown when chest is opened -->
+      <div id="chest-question" class="chest-q-overlay" style="display:none">
+        <div class="chest-q-box">
+          <div class="chest-q-label" id="cq-label">Found: Glycine</div>
+          <div class="chest-q-text" id="cq-text"></div>
+          <div class="chest-q-options" id="cq-options"></div>
+          <div class="chest-q-feedback" id="cq-feedback" style="display:none"></div>
+          <button id="cq-collect-btn" class="btn btn-success" style="display:none" onclick="collectAminoAcid()">
+            ✓ Add to Collection
+          </button>
+          <button id="cq-close-btn" class="btn btn-secondary mt-1" onclick="closeChestQuestion()">
+            Close
+          </button>
+        </div>
+      </div>
+      <!-- Victory overlay -->
+      <div id="explorer-victory" class="explorer-victory" style="display:none">
+        <div class="victory-box">
+          <div style="font-size:3rem">🏆</div>
+          <h2>Collection Complete!</h2>
+          <p>You collected all 10 amino acids!</p>
+          <button class="btn btn-primary mt-2" onclick="exitToMenu()">Back to Menu</button>
+        </div>
+      </div>
+
+      <!-- MEDIUM chest: pick the correct structure from 4 SVG options -->
+      <div id="struct-challenge" class="chest-q-overlay" style="display:none">
+        <div class="chest-q-box" style="max-width:560px">
+          <div class="chest-q-label">🔬 Structure Challenge — Which diagram shows <strong id="sc-aa-name"></strong>?</div>
+          <div class="sc-opts" id="sc-options"></div>
+          <div class="chest-q-feedback" id="sc-feedback" style="display:none"></div>
+          <button id="sc-collect-btn" class="btn btn-success mt-1" style="display:none" onclick="collectAfterStructure()">✓ Add to Collection</button>
+          <button class="btn btn-secondary mt-1" onclick="closeStructChallenge()">Skip (collect without bonus)</button>
+        </div>
+      </div>
+
+      <!-- HARD chest: connect-the-dots side-chain drawing -->
+      <div id="draw-challenge" class="chest-q-overlay" style="display:none">
+        <div class="chest-q-box">
+          <div class="chest-q-label">✏️ Draw the Side Chain</div>
+          <p id="dc-hint" style="font-size:0.84rem;color:var(--muted);margin-bottom:0.5rem;line-height:1.5"></p>
+          <p style="font-size:0.73rem;color:var(--muted);margin-bottom:0.6rem">
+            Click a node to select it (it glows), then click another node to draw a bond between them.
+          </p>
+          <canvas id="draw-canvas" width="220" height="140"
+            style="border-radius:0.5rem;border:1px solid var(--border);cursor:crosshair;width:100%;max-width:320px;display:block;margin:0 auto"></canvas>
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
+            <button class="btn btn-secondary" onclick="undoLastBond()">↩ Undo</button>
+            <button class="btn btn-secondary" onclick="clearDrawing()">✕ Clear</button>
+            <button class="btn btn-primary"   onclick="submitDrawing()">✓ Submit</button>
+          </div>
+          <div class="chest-q-feedback" id="dc-feedback" style="display:none;margin-top:0.75rem"></div>
+          <button id="dc-collect-btn" class="btn btn-success mt-1" style="display:none" onclick="collectAfterDraw()">✓ Add to Collection</button>
+          <button class="btn btn-secondary mt-1" onclick="closeDrawChallenge()">Skip (collect without bonus)</button>
+        </div>
+      </div>
+    </div>
+    <!-- Collection sidebar -->
+    <div class="collection-sidebar">
+      <div class="coll-header">
+        <span>🧪 Collection</span>
+        <span id="coll-count" style="color:var(--primary);font-weight:800">0 / 10</span>
+      </div>
+      <div class="coll-grid" id="coll-grid"></div>
+      <div class="coll-hint">Walk around and find all 10 amino acid chests!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+
+// ================================================================
+//  AMINO ACID DATA
+//  To add more amino acids: copy one object and fill in the fields.
+// ================================================================
+const AMINO_ACIDS = [
+  {
+    name: "Glycine",
+    abbr3: "Gly", abbr1: "G", category: "nonpolar",
+    property: "Smallest amino acid — side chain is just a single hydrogen atom (H)",
+    hint: "Glycine is the only amino acid with no chiral centre (no L or D form)."
+  },
+  {
+    name: "Alanine",
+    abbr3: "Ala", abbr1: "A", category: "nonpolar",
+    property: "Simple nonpolar amino acid with a methyl group (–CH₃) as its side chain",
+    hint: "One of the most abundant amino acids in proteins. Very stable and simple."
+  },
+  {
+    name: "Cysteine",
+    abbr3: "Cys", abbr1: "C", category: "polar",
+    property: "Contains a thiol (–SH) group; two cysteines can link to form disulfide bonds",
+    hint: "Disulfide (–S–S–) bonds lock protein shapes. Found in hair and nail keratin."
+  },
+  {
+    name: "Serine",
+    abbr3: "Ser", abbr1: "S", category: "polar",
+    property: "Has a hydroxyl (–OH) group; key in enzyme active sites and cell signalling",
+    hint: "Serine is frequently phosphorylated (a phosphate added) as an on/off molecular switch."
+  },
+  {
+    name: "Lysine",
+    abbr3: "Lys", abbr1: "K", category: "positive",
+    property: "Positively charged at body pH; an essential amino acid we must obtain from food",
+    hint: "Lysine deficiency is common in plant-based diets. Important for growth and repair."
+  },
+  {
+    name: "Aspartic Acid",
+    abbr3: "Asp", abbr1: "D", category: "negative",
+    property: "Negatively charged at body pH; one of the two amino acids in sweetener aspartame",
+    hint: "As 'aspartate', it is a key intermediate in the urea cycle — how the body removes ammonia."
+  },
+  {
+    name: "Phenylalanine",
+    abbr3: "Phe", abbr1: "F", category: "nonpolar",
+    property: "Contains a benzene ring; essential amino acid; precursor to adrenaline and dopamine",
+    hint: "People with PKU cannot metabolise phenylalanine, so they must avoid aspartame."
+  },
+  {
+    name: "Tryptophan",
+    abbr3: "Trp", abbr1: "W", category: "nonpolar",
+    property: "Largest amino acid; the body converts it into serotonin (the mood neurotransmitter)",
+    hint: "Tryptophan also makes melatonin (sleep hormone). Rich sources: turkey, milk, nuts."
+  },
+  {
+    name: "Proline",
+    abbr3: "Pro", abbr1: "P", category: "nonpolar",
+    property: "Ring-shaped side chain bonds back to its own backbone, creating rigid kinks in proteins",
+    hint: "Proline breaks alpha-helix structures. Collagen (skin, tendons) is ~13% proline."
+  },
+  {
+    name: "Methionine",
+    abbr3: "Met", abbr1: "M", category: "nonpolar",
+    property: "Always the 'start codon' signal in protein synthesis; contains a sulfur atom",
+    hint: "Every protein begins being built with Met (often removed later). It is an essential amino acid."
+  },
+  {
+    name: "Valine",
+    abbr3: "Val", abbr1: "V", category: "nonpolar",
+    property: "Branched-chain nonpolar amino acid with an isopropyl side chain (–CH(CH₃)₂)",
+    hint: "Valine, Leucine, and Isoleucine are the three branched-chain amino acids (BCAAs) popular in sports nutrition."
+  },
+  {
+    name: "Leucine",
+    abbr3: "Leu", abbr1: "L", category: "nonpolar",
+    property: "Branched-chain amino acid with a 4-carbon isobutyl side chain; most abundant BCAA in muscle",
+    hint: "Leucine uniquely activates mTOR — the master regulator of muscle protein synthesis. Key for muscle building."
+  },
+  {
+    name: "Isoleucine",
+    abbr3: "Ile", abbr1: "I", category: "nonpolar",
+    property: "Branched-chain amino acid with branching at the beta-carbon; important for haemoglobin function",
+    hint: "Isoleucine has TWO chiral centres — it can form 4 stereoisomers, but only the L-Ile form occurs in proteins."
+  },
+  {
+    name: "Threonine",
+    abbr3: "Thr", abbr1: "T", category: "polar",
+    property: "Has both a hydroxyl (–OH) and methyl group; like Serine but bulkier; can be phosphorylated",
+    hint: "Threonine is one of the 9 essential amino acids. It also has two chiral centres (like Isoleucine)."
+  },
+  {
+    name: "Tyrosine",
+    abbr3: "Tyr", abbr1: "Y", category: "polar",
+    property: "Phenylalanine with a para–OH group; polar, phosphorylatable, and a catecholamine precursor",
+    hint: "Tyrosine kinases (e.g. insulin receptor, EGFR) regulate major cell signalling and are mutated in many cancers."
+  },
+  {
+    name: "Asparagine",
+    abbr3: "Asn", abbr1: "N", category: "polar",
+    property: "Amide derivative of Aspartic Acid; side chain ends in –CONH₂; key site for N-linked glycosylation",
+    hint: "The 'N' in N-linked glycosylation stands for Asparagine — sugar chains attach to its amide nitrogen."
+  },
+  {
+    name: "Glutamine",
+    abbr3: "Gln", abbr1: "Q", category: "polar",
+    property: "Amide of Glutamic Acid; one carbon longer than Asparagine; most abundant free amino acid in blood",
+    hint: "Glutamine is the main fuel for rapidly dividing cells — immune cells and gut epithelium are 'glutamine-addicted'."
+  },
+  {
+    name: "Glutamic Acid",
+    abbr3: "Glu", abbr1: "E", category: "negative",
+    property: "Negatively charged at body pH; the brain's primary excitatory neurotransmitter (glutamate)",
+    hint: "MSG (monosodium glutamate) is the sodium salt of Glutamic Acid — it gives the 'umami' (savoury) taste."
+  },
+  {
+    name: "Arginine",
+    abbr3: "Arg", abbr1: "R", category: "positive",
+    property: "Most positively charged amino acid; contains a guanidinium group; precursor to nitric oxide (NO)",
+    hint: "Arginine → Nitric Oxide (via nitric oxide synthase). NO dilates blood vessels — exploited in cardiovascular drugs."
+  },
+  {
+    name: "Histidine",
+    abbr3: "His", abbr1: "H", category: "positive",
+    property: "Imidazole side chain; pKa ~6 means it can act as both acid and base near physiological pH",
+    hint: "Histidine is the acid–base catalyst in haemoglobin — it shuttles protons as the protein binds and releases O₂."
+  },
+];
+
+// ================================================================
+//  SVG STRUCTURE DIAGRAMS
+//  Each function returns an SVG string for the structure card.
+//  viewBox="0 0 110 90" — white/light strokes, coloured key atoms.
+// ================================================================
+const SVG_STRUCTURES = {
+
+  // Glycine — large "H" with caption "no side chain"
+  Glycine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <text x="55" y="52" text-anchor="middle" font-size="38" font-weight="900"
+          fill="#94a3b8" font-family="serif">H</text>
+    <text x="55" y="72" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">no side chain</text>
+  </svg>`,
+
+  // Alanine — Cα dot → bond → CH₃
+  Alanine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="28" cy="45" r="4" fill="#94a3b8"/>
+    <line x1="32" y1="45" x2="68" y2="45" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="72" y="50" font-size="13" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <text x="55" y="72" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">methyl –CH₃</text>
+  </svg>`,
+
+  // Cysteine — Cα dot → C dot → S (yellow) → H
+  Cysteine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="18" cy="40" r="4" fill="#94a3b8"/>
+    <line x1="22" y1="40" x2="44" y2="40" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="48" cy="40" r="4" fill="#94a3b8"/>
+    <line x1="52" y1="40" x2="68" y2="40" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="72" cy="40" r="8" fill="#713f12" stroke="#eab308" stroke-width="1.8"/>
+    <text x="72" y="44" text-anchor="middle" font-size="9" font-weight="700"
+          fill="#fef08a" font-family="sans-serif">S</text>
+    <text x="85" y="44" font-size="10" fill="#cbd5e1" font-family="sans-serif">H</text>
+    <text x="55" y="70" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">thiol –SH</text>
+  </svg>`,
+
+  // Serine — Cα dot → C dot → O (red) → H
+  Serine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="18" cy="40" r="4" fill="#94a3b8"/>
+    <line x1="22" y1="40" x2="44" y2="40" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="48" cy="40" r="4" fill="#94a3b8"/>
+    <line x1="52" y1="40" x2="68" y2="40" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="72" cy="40" r="8" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.8"/>
+    <text x="72" y="44" text-anchor="middle" font-size="9" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O</text>
+    <text x="85" y="44" font-size="10" fill="#cbd5e1" font-family="sans-serif">H</text>
+    <text x="55" y="70" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">hydroxyl –OH</text>
+  </svg>`,
+
+  // Lysine — 5-carbon zigzag ending in NH₃⁺ (blue)
+  Lysine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="12,55 26,38 40,55 54,38 68,55"
+              fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="68" y1="55" x2="82" y2="55" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="86" cy="55" r="9" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.8"/>
+    <text x="86" y="59" text-anchor="middle" font-size="7.5" font-weight="700"
+          fill="#93c5fd" font-family="sans-serif">NH₃⁺</text>
+    <text x="55" y="78" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">long chain + NH₃⁺</text>
+  </svg>`,
+
+  // Aspartic Acid — Cα → C → C with =O up and O⁻ down (both red)
+  "Aspartic Acid": `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="20" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="24" y1="48" x2="46" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="50" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="54" y1="48" x2="76" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="80" cy="48" r="4" fill="#94a3b8"/>
+    <!-- double bond =O up -->
+    <line x1="79" y1="44" x2="79" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <line x1="83" y1="44" x2="83" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="81" cy="25" r="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="81" y="29" text-anchor="middle" font-size="8" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O</text>
+    <!-- O⁻ down -->
+    <line x1="81" y1="52" x2="81" y2="66" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="81" cy="71" r="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="81" y="75" text-anchor="middle" font-size="7.5" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O⁻</text>
+    <text x="45" y="87" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">carboxyl –COO⁻</text>
+  </svg>`,
+
+  // Phenylalanine — Cα → line → hexagon (orange)
+  Phenylalanine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="45" r="4" fill="#94a3b8"/>
+    <line x1="16" y1="45" x2="36" y2="45" stroke="#94a3b8" stroke-width="2.5"/>
+    <!-- Benzene hexagon centred at 63,45 r=22 -->
+    <polygon points="63,23 84,34 84,56 63,67 42,56 42,34"
+             fill="none" stroke="#fb923c" stroke-width="2.2"/>
+    <!-- Inner dashed circle representing aromatic ring -->
+    <circle cx="63" cy="45" r="11" fill="none" stroke="#fb923c"
+            stroke-width="1.2" stroke-dasharray="3,2.5"/>
+    <text x="55" y="82" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">benzene ring</text>
+  </svg>`,
+
+  // Tryptophan — Cα → line → bicyclic (hexagon + pentagon fused, blue N)
+  Tryptophan: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="12" y1="48" x2="28" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <!-- Hexagon left side, centred at 50,45 -->
+    <polygon points="50,26 67,35 67,55 50,64 33,55 33,35"
+             fill="none" stroke="#94a3b8" stroke-width="2"/>
+    <!-- Pentagon right side fused to hexagon, sharing edge 67,35–67,55 -->
+    <polygon points="67,35 85,30 94,47 85,64 67,55"
+             fill="none" stroke="#94a3b8" stroke-width="2"/>
+    <!-- N atom inside pentagon -->
+    <text x="80" y="51" text-anchor="middle" font-size="11" font-weight="800"
+          fill="#60a5fa" font-family="sans-serif">N</text>
+    <text x="50" y="80" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">indole (largest)</text>
+  </svg>`,
+
+  // Proline — pentagon ring with blue N on left vertex
+  Proline: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <!-- Pentagon centred at 62,44 -->
+    <polygon points="38,44 51,26 73,26 86,44 62,60"
+             fill="none" stroke="#94a3b8" stroke-width="2.5"/>
+    <!-- N label at left vertex -->
+    <circle cx="38" cy="44" r="9" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.8"/>
+    <text x="38" y="48" text-anchor="middle" font-size="10" font-weight="800"
+          fill="#93c5fd" font-family="sans-serif">N</text>
+    <text x="55" y="78" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">ring → kinks</text>
+  </svg>`,
+
+  // Methionine — Cα → C → S (yellow) → C → CH₃
+  Methionine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10" cy="44" r="4" fill="#94a3b8"/>
+    <line x1="14" y1="44" x2="32" y2="44" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="36" cy="44" r="4" fill="#94a3b8"/>
+    <line x1="40" y1="44" x2="54" y2="44" stroke="#94a3b8" stroke-width="2.5"/>
+    <!-- S atom -->
+    <circle cx="58" cy="44" r="9" fill="#713f12" stroke="#eab308" stroke-width="1.8"/>
+    <text x="58" y="48" text-anchor="middle" font-size="10" font-weight="700"
+          fill="#fef08a" font-family="sans-serif">S</text>
+    <line x1="67" y1="44" x2="80" y2="44" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="83" y="49" font-size="12" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <text x="55" y="70" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">thioether –S–</text>
+  </svg>`,
+
+  // Valine — Cα → branching C → two CH₃ arms
+  Valine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="18" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="22" y1="48" x2="48" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="52" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="55" y1="45" x2="72" y2="30" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="74" y="29" font-size="11" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <line x1="55" y1="51" x2="72" y2="66" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="74" y="70" font-size="11" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <text x="50" y="84" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">branched –CH(CH₃)₂</text>
+  </svg>`,
+
+  // Leucine — Cα → C → branching C → two CH₃ arms
+  Leucine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="14" y1="48" x2="32" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="36" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="40" y1="48" x2="58" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="62" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="65" y1="45" x2="76" y2="31" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="78" y="30" font-size="10" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <line x1="65" y1="51" x2="76" y2="65" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="78" y="69" font-size="10" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <text x="50" y="84" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">C-C-branch</text>
+  </svg>`,
+
+  // Isoleucine — Cα → Cβ (branch up: CH₃) → Cγ → CH₃
+  Isoleucine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="12" cy="58" r="4" fill="#94a3b8"/>
+    <line x1="16" y1="58" x2="40" y2="58" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="44" cy="58" r="4" fill="#94a3b8"/>
+    <line x1="44" y1="54" x2="44" y2="34" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="38" y="30" font-size="10" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <line x1="48" y1="58" x2="68" y2="58" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="72" cy="58" r="4" fill="#94a3b8"/>
+    <line x1="76" y1="58" x2="96" y2="58" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="97" y="62" font-size="10" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <text x="50" y="82" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">β-branch + ethyl</text>
+  </svg>`,
+
+  // Threonine — Cα → Cβ (OH up, CH₃ right)
+  Threonine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="54" r="4" fill="#94a3b8"/>
+    <line x1="18" y1="54" x2="44" y2="54" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="48" cy="54" r="4" fill="#94a3b8"/>
+    <line x1="48" y1="50" x2="48" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="48" cy="22" r="9" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="48" y="27" text-anchor="middle" font-size="9" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">OH</text>
+    <line x1="52" y1="54" x2="74" y2="54" stroke="#94a3b8" stroke-width="2.5"/>
+    <text x="77" y="58" font-size="11" fill="#cbd5e1" font-family="sans-serif">CH₃</text>
+    <text x="50" y="80" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">–OH + methyl</text>
+  </svg>`,
+
+  // Tyrosine — like Phe but with para-OH on right vertex of benzene
+  Tyrosine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="45" r="4" fill="#94a3b8"/>
+    <line x1="12" y1="45" x2="27" y2="45" stroke="#94a3b8" stroke-width="2.5"/>
+    <polygon points="50,26 67,35 67,55 50,64 33,55 33,35"
+             fill="none" stroke="#fb923c" stroke-width="2.2"/>
+    <circle cx="50" cy="45" r="9" fill="none" stroke="#fb923c"
+            stroke-width="1.2" stroke-dasharray="3,2.5"/>
+    <line x1="67" y1="45" x2="80" y2="45" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="88" cy="45" r="9" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="88" y="49" text-anchor="middle" font-size="9" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">OH</text>
+    <text x="50" y="80" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">benzene-OH (para)</text>
+  </svg>`,
+
+  // Asparagine — Cα → C → C with =O up and NH₂ down
+  Asparagine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="14" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="18" y1="48" x2="40" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="44" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="48" y1="48" x2="68" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="72" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="71" y1="44" x2="71" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <line x1="75" y1="44" x2="75" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="73" cy="23" r="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="73" y="27" text-anchor="middle" font-size="8" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O</text>
+    <line x1="73" y1="52" x2="73" y2="66" stroke="#60a5fa" stroke-width="2.2"/>
+    <circle cx="73" cy="73" r="9" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="73" y="77" text-anchor="middle" font-size="8" font-weight="700"
+          fill="#93c5fd" font-family="sans-serif">NH₂</text>
+    <text x="45" y="90" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">amide –CONH₂</text>
+  </svg>`,
+
+  // Glutamine — like Asparagine but one more CH₂ in chain
+  Glutamine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="12" y1="48" x2="28" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="32" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="36" y1="48" x2="52" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="56" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="60" y1="48" x2="76" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="80" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="79" y1="44" x2="79" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <line x1="83" y1="44" x2="83" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="81" cy="23" r="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="81" y="27" text-anchor="middle" font-size="8" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O</text>
+    <line x1="81" y1="52" x2="81" y2="66" stroke="#60a5fa" stroke-width="2.2"/>
+    <circle cx="81" cy="73" r="9" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="81" y="77" text-anchor="middle" font-size="8" font-weight="700"
+          fill="#93c5fd" font-family="sans-serif">NH₂</text>
+    <text x="45" y="90" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">longer amide</text>
+  </svg>`,
+
+  // Glutamic Acid — like Aspartic Acid but one more CH₂
+  "Glutamic Acid": `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="8" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="12" y1="48" x2="28" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="32" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="36" y1="48" x2="52" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="56" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="60" y1="48" x2="76" y2="48" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="80" cy="48" r="4" fill="#94a3b8"/>
+    <line x1="79" y1="44" x2="79" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <line x1="83" y1="44" x2="83" y2="28" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="81" cy="23" r="6" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="81" y="27" text-anchor="middle" font-size="8" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O</text>
+    <line x1="81" y1="52" x2="81" y2="66" stroke="#ef4444" stroke-width="2.2"/>
+    <circle cx="81" cy="72" r="7" fill="#7f1d1d" stroke="#ef4444" stroke-width="1.5"/>
+    <text x="81" y="76" text-anchor="middle" font-size="7.5" font-weight="700"
+          fill="#fecaca" font-family="sans-serif">O⁻</text>
+    <text x="45" y="90" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">longer –COO⁻</text>
+  </svg>`,
+
+  // Arginine — zigzag chain → N → guanidinium C → two N arms
+  Arginine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <polyline points="8,56 19,40 30,56 41,40"
+              fill="none" stroke="#94a3b8" stroke-width="2.5" stroke-linejoin="round"/>
+    <line x1="41" y1="40" x2="55" y2="40" stroke="#60a5fa" stroke-width="2.5"/>
+    <circle cx="60" cy="40" r="8" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="60" y="44" text-anchor="middle" font-size="9" font-weight="700"
+          fill="#93c5fd" font-family="sans-serif">N</text>
+    <line x1="68" y1="40" x2="78" y2="40" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="82" cy="40" r="4" fill="#94a3b8"/>
+    <line x1="85" y1="37" x2="94" y2="24" stroke="#60a5fa" stroke-width="2.2"/>
+    <text x="97" y="21" font-size="8.5" fill="#93c5fd" font-family="sans-serif">=NH</text>
+    <line x1="85" y1="43" x2="94" y2="57" stroke="#60a5fa" stroke-width="2.2"/>
+    <text x="96" y="61" font-size="8.5" fill="#93c5fd" font-family="sans-serif">NH₂</text>
+    <text x="50" y="80" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">guanidinium</text>
+  </svg>`,
+
+  // Histidine — Cα → Cβ → imidazole pentagon (2 blue N)
+  Histidine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="10" cy="55" r="4" fill="#94a3b8"/>
+    <line x1="14" y1="55" x2="32" y2="55" stroke="#94a3b8" stroke-width="2.5"/>
+    <circle cx="36" cy="55" r="4" fill="#94a3b8"/>
+    <line x1="40" y1="55" x2="55" y2="55" stroke="#94a3b8" stroke-width="2.5"/>
+    <!-- Imidazole pentagon: bottom-left → top-left-N → top-C → right-N → bottom-right → close -->
+    <polygon points="60,70 60,40 78,28 92,44 86,70"
+             fill="none" stroke="#94a3b8" stroke-width="2.2"/>
+    <circle cx="60" cy="40" r="8" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="60" y="44" text-anchor="middle" font-size="8.5" font-weight="700"
+          fill="#93c5fd" font-family="sans-serif">N</text>
+    <circle cx="92" cy="44" r="8" fill="#1e3a5f" stroke="#60a5fa" stroke-width="1.5"/>
+    <text x="92" y="48" text-anchor="middle" font-size="8.5" font-weight="700"
+          fill="#93c5fd" font-family="sans-serif">N</text>
+    <text x="55" y="84" text-anchor="middle" font-size="8.5" fill="#64748b"
+          font-family="sans-serif">imidazole ring</text>
+  </svg>`,
+};
+
+// ================================================================
+//  QUIZ QUESTIONS
+// ================================================================
+const ALL_QUESTIONS = [
+  {
+    q: "Which amino acid is the SMALLEST, with only a single hydrogen atom as its side chain?",
+    a: "Glycine",
+    options: ["Glycine", "Alanine", "Serine", "Proline"],
+    explain: "Glycine has just –H as its side chain — the tiniest possible, giving proteins extra flexibility at that position."
+  },
+  {
+    q: "Which amino acid can form DISULFIDE BONDS by pairing its thiol group with another of its kind?",
+    a: "Cysteine",
+    options: ["Serine", "Cysteine", "Methionine", "Lysine"],
+    explain: "Cysteine's –SH (thiol) group oxidises with another –SH to form –S–S–. This cross-link stabilises 3D protein shapes."
+  },
+  {
+    q: "Serotonin (the 'feel-good' neurotransmitter) is synthesised in the body from which amino acid?",
+    a: "Tryptophan",
+    options: ["Phenylalanine", "Lysine", "Tryptophan", "Glycine"],
+    explain: "Tryptophan → 5-HTP → Serotonin. Low dietary tryptophan can affect mood and sleep."
+  },
+  {
+    q: "Which amino acid is ALWAYS the first amino acid coded for when a cell starts building any new protein?",
+    a: "Methionine",
+    options: ["Glycine", "Proline", "Alanine", "Methionine"],
+    explain: "The start codon AUG always codes for Methionine. Every protein begins with Met (though it is often trimmed away afterwards)."
+  },
+  {
+    q: "Which amino acid carries a POSITIVE charge at normal body pH (~7.4)?",
+    a: "Lysine",
+    options: ["Aspartic Acid", "Serine", "Lysine", "Alanine"],
+    explain: "Lysine's long chain ends in –NH₃⁺, holding a positive charge at physiological pH."
+  },
+  {
+    q: "Which amino acid's unique RING structure causes rigid kinks and bends in protein chains?",
+    a: "Proline",
+    options: ["Tryptophan", "Phenylalanine", "Proline", "Glycine"],
+    explain: "Proline's side chain loops back and bonds to its own backbone nitrogen, preventing rotation and forcing a structural bend."
+  },
+  {
+    q: "Which amino acid carries a NEGATIVE charge at body pH?",
+    a: "Aspartic Acid",
+    options: ["Lysine", "Aspartic Acid", "Serine", "Alanine"],
+    explain: "Aspartic acid (pKa ≈ 3.9) donates its proton at body pH, leaving a negatively charged –COO⁻ side chain."
+  },
+  {
+    q: "Which amino acid contains a pure BENZENE RING as its side chain and is essential (must come from food)?",
+    a: "Phenylalanine",
+    options: ["Serine", "Phenylalanine", "Tryptophan", "Cysteine"],
+    explain: "Phenylalanine = 'phenyl' (benzene ring) + 'alanine'. Tryptophan has a larger indole ring (benzene fused with pyrrole)."
+  },
+  {
+    q: "Which amino acid contains a HYDROXYL (–OH) group and is often found in enzyme active sites?",
+    a: "Serine",
+    options: ["Serine", "Glycine", "Methionine", "Proline"],
+    explain: "Serine's –OH is reactive and forms the catalytic centre of 'serine proteases' — enzymes that cut other proteins."
+  },
+  {
+    q: "How many of the 20 standard amino acids are ESSENTIAL (cannot be made by the human body)?",
+    a: "9",
+    options: ["5", "9", "15", "20"],
+    explain: "The 9 essential amino acids are: His, Ile, Leu, Lys, Met, Phe, Thr, Trp, Val. They must come from food."
+  },
+  {
+    q: "What GROUP in Cysteine allows it to form disulfide bonds with other cysteines?",
+    a: "Thiol (–SH) group",
+    options: ["Benzene ring", "Thiol (–SH) group", "Hydroxyl (–OH) group", "Positive charge"],
+    explain: "Two –SH groups lose a hydrogen each and bond: –SH + HS– → –S–S– + 2H. This is an oxidation reaction."
+  },
+  {
+    q: "The structural protein COLLAGEN (in skin, tendons, cartilage) is unusually rich in which amino acid?",
+    a: "Proline",
+    options: ["Lysine", "Proline", "Methionine", "Tryptophan"],
+    explain: "Collagen is ~13% Proline and ~33% Glycine. Proline's rigid structure gives collagen its tensile strength."
+  },
+  {
+    q: "Which amino acid contains SULFUR and is ALSO the universal 'start' signal for protein synthesis?",
+    a: "Methionine",
+    options: ["Cysteine", "Methionine", "Serine", "Lysine"],
+    explain: "Both Cys and Met contain sulfur, but only Methionine (codon AUG) triggers ribosomal protein synthesis."
+  },
+  {
+    q: "The artificial sweetener ASPARTAME is made from Phenylalanine plus which other amino acid?",
+    a: "Aspartic Acid",
+    options: ["Glycine", "Serine", "Aspartic Acid", "Lysine"],
+    explain: "Aspartame = Aspartic acid + Phenylalanine + methanol. Its PKU warning refers to the phenylalanine content."
+  },
+  {
+    q: "NONPOLAR amino acids are described as 'hydrophobic'. What does hydrophobic mean?",
+    a: "They repel water and prefer to be buried inside proteins",
+    options: [
+      "They attract water and stay on the protein surface",
+      "They carry a negative charge",
+      "They repel water and prefer to be buried inside proteins",
+      "They are always positively charged"
+    ],
+    explain: "Nonpolar side chains lack partial charges, so they cannot form hydrogen bonds with water. They cluster inside protein cores."
+  },
+];
+
+// ================================================================
+//  GAME STATE
+// ================================================================
+const state = {
+  playerName: "Player",
+  playerScore: 0,
+  botScore: 0,
+
+  // Memory (Matching) game sub-state
+  mg: {
+    pairs: [],          // 6 amino acid objects chosen for this round
+    cards: [],          // 12 card objects: {id, pairIdx, type, flipped, locked}
+    flipped: [],        // ids of currently face-up unmatched cards (max 2)
+    locked: 0,          // count of locked pairs
+    playerCorrect: 0,
+    botCorrect: 0,
+    botActive: false,
+    botKnown: new Map(), // cardId → pairIdx  (bot's memory)
+    botTimer: null,
+  },
+
+  // Quiz sub-state
+  qz: {
+    questions: [],
+    current: 0,
+    playerRoundScore: 0,
+    botRoundScore: 0,
+    answered: false,
+    timeLeft: 20,
+    timerInterval: null,
+    botTimer: null,
+  },
+};
+
+// ================================================================
+//  NAVIGATION
+// ================================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goHome() {
+  stopAllTimers();
+  showScreen('screen-home');
+}
+
+function exitToMenu() {
+  stopAllTimers();
+  // Reset bot-active so clicks are re-enabled next game
+  state.mg.botActive = false;
+  // Stop explorer if running
+  if (typeof stopExplorer === 'function') stopExplorer();
+  showScreen('screen-game-select');
+}
+
+function startSession() {
+  const name = document.getElementById('player-name').value.trim();
+  state.playerName = name || "Player";
+  state.playerScore = 0;
+  state.botScore = 0;
+  refreshAllScores();
+  showScreen('screen-game-select');
+}
+
+function stopAllTimers() {
+  clearTimeout(state.mg.botTimer);
+  clearInterval(state.qz.timerInterval);
+  clearTimeout(state.qz.botTimer);
+}
+
+// ================================================================
+//  SCORE HELPERS
+// ================================================================
+function addPoints(who, pts) {
+  if (who === 'player') state.playerScore = Math.max(0, state.playerScore + pts);
+  else                  state.botScore    = Math.max(0, state.botScore    + pts);
+  refreshAllScores();
+}
+
+function refreshAllScores() {
+  document.getElementById('gs-pname').textContent   = state.playerName;
+  document.getElementById('gs-pscore').textContent  = state.playerScore;
+  document.getElementById('gs-bscore').textContent  = state.botScore;
+  document.getElementById('gs-welcome').textContent = `👋 Hi, ${state.playerName}`;
+
+  document.getElementById('mg-pname').textContent  = state.playerName;
+  document.getElementById('mg-pscore').textContent = state.playerScore;
+  document.getElementById('mg-bscore').textContent = state.botScore;
+
+  document.getElementById('qz-pname').textContent  = state.playerName;
+  document.getElementById('qz-pscore').textContent = state.playerScore;
+  document.getElementById('qz-bscore').textContent = state.botScore;
+
+  document.getElementById('ex-pname').textContent  = state.playerName;
+  document.getElementById('ex-pscore').textContent = state.playerScore;
+  document.getElementById('ex-bscore').textContent = state.botScore;
+}
+
+// ================================================================
+//  TOAST
+// ================================================================
+let _toastTimer;
+function toast(msg, type = 'info') {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `show ${type}`;
+  clearTimeout(_toastTimer);
+  _toastTimer = setTimeout(() => el.className = '', 3000);
+}
+
+// ================================================================
+//  UTILITIES
+// ================================================================
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+function catLabel(cat) {
+  return { nonpolar: 'Nonpolar', polar: 'Polar Uncharged', positive: 'Positively Charged', negative: 'Negatively Charged' }[cat] || cat;
+}
+
+function catColour(cat) {
+  return { nonpolar: 'nonpolar', polar: 'polar', positive: 'positive', negative: 'negative' }[cat] || 'muted';
+}
+
+// ================================================================
+//  MEMORY MATCH GAME
+// ================================================================
+
+/* ---------- Setup ---------- */
+
+function startMatchingGame() {
+  const mg = state.mg;
+
+  // Reset state
+  mg.pairs         = shuffle(AMINO_ACIDS).slice(0, 6);
+  mg.cards         = [];
+  mg.flipped       = [];
+  mg.locked        = 0;
+  mg.playerCorrect = 0;
+  mg.botCorrect    = 0;
+  mg.botActive     = false;
+  mg.botKnown      = new Map();
+  clearTimeout(mg.botTimer);
+
+  buildMemoryCards();
+  refreshAllScores();
+  document.getElementById('mg-matched').textContent  = '0 / 6';
+  document.getElementById('mg-pcorrect').textContent = '0';
+  document.getElementById('mg-bcorrect').textContent = '0';
+  showScreen('screen-matching');
+  setTurnIndicator('player');
+  botSetMsg('mg', 'You go first — good luck!');
+}
+
+/*
+  buildMemoryCards — creates 12 card objects (6 name + 6 struct),
+  shuffles them, then renders the 4×3 grid.
+*/
+function buildMemoryCards() {
+  const mg = state.mg;
+  const cards = [];
+
+  mg.pairs.forEach((aa, pairIdx) => {
+    cards.push({ id: `n${pairIdx}`, pairIdx, type: 'name',   flipped: false, locked: false });
+    cards.push({ id: `s${pairIdx}`, pairIdx, type: 'struct', flipped: false, locked: false });
+  });
+
+  mg.cards = shuffle(cards);
+  renderMemoryGrid();
+}
+
+/* ---------- Rendering ---------- */
+
+function renderMemoryGrid() {
+  const mg   = state.mg;
+  const grid = document.getElementById('memory-grid');
+  grid.innerHTML = '';
+
+  mg.cards.forEach(card => {
+    const wrap  = document.createElement('div');
+    wrap.className = 'mem-card-wrap';
+    wrap.id        = `wrap-${card.id}`;
+    wrap.onclick   = () => onCardClick(card.id);
+
+    const inner = document.createElement('div');
+    inner.className = 'mem-card-inner';
+    inner.id        = `card-inner-${card.id}`;
+
+    // --- Back face ---
+    const back = document.createElement('div');
+    back.className = `mem-face mem-back ${card.type === 'name' ? 'back-name' : 'back-struct'}`;
+    back.innerHTML = `
+      <div class="mem-back-icon">${card.type === 'name' ? '🔤' : '🔬'}</div>
+      <div class="mem-back-label">${card.type === 'name' ? 'NAME' : 'STRUCTURE'}</div>
+    `;
+
+    // --- Front face ---
+    const front = document.createElement('div');
+    front.className = `mem-face mem-front ${card.type === 'name' ? 'front-name' : 'front-struct'}`;
+
+    const aa = mg.pairs[card.pairIdx];
+    if (card.type === 'name') {
+      front.innerHTML = `
+        <div class="mem-name-text">${aa.name}</div>
+        <div class="mem-abbr">${aa.abbr3} · ${aa.abbr1}</div>
+        <div class="mem-cat-tag cat-tag-${aa.category}">${catLabel(aa.category)}</div>
+      `;
+    } else {
+      const svgMarkup = SVG_STRUCTURES[aa.name] || `<svg viewBox="0 0 110 90"><text x="55" y="50" text-anchor="middle" fill="#94a3b8" font-size="11">${aa.name}</text></svg>`;
+      front.innerHTML = `
+        <div class="mem-svg-wrap">${svgMarkup}</div>
+        <div class="mem-struct-label">${aa.name}</div>
+      `;
+    }
+
+    inner.appendChild(back);
+    inner.appendChild(front);
+    wrap.appendChild(inner);
+    grid.appendChild(wrap);
+  });
+}
+
+/* ---------- Card interaction ---------- */
+
+/*
+  onCardClick — called when player clicks a card.
+  Ignores clicks if: bot is active, card is locked, card is already
+  face-up, or two cards are already pending resolution.
+*/
+function onCardClick(id) {
+  const mg   = state.mg;
+  if (mg.botActive) return;
+  if (mg.flipped.length >= 2) return;
+
+  const card = mg.cards.find(c => c.id === id);
+  if (!card || card.locked || card.flipped) return;
+
+  flipCard(id, true);
+  mg.flipped.push(id);
+  // Reveal helps bot memorise (player actions also populate bot's memory)
+  updateBotMemory(card);
+
+  if (mg.flipped.length === 2) {
+    // Disable clicks briefly while we evaluate
+    document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.add('no-click'));
+    setTimeout(() => checkMemoryMatch(), 600);
+  }
+}
+
+/*
+  flipCard — add/remove the is-flipped class on the wrapper element,
+  which triggers the CSS rotateY transition.
+*/
+function flipCard(id, faceUp) {
+  const wrap = document.getElementById(`wrap-${id}`);
+  if (!wrap) return;
+  if (faceUp) {
+    wrap.classList.add('is-flipped');
+  } else {
+    wrap.classList.remove('is-flipped');
+  }
+  // Keep card data in sync
+  const card = state.mg.cards.find(c => c.id === id);
+  if (card) card.flipped = faceUp;
+}
+
+/*
+  checkMemoryMatch — runs 600ms after the second card is flipped.
+  A match requires: same pairIdx AND different type (name+struct).
+*/
+function checkMemoryMatch() {
+  const mg  = state.mg;
+  const [id1, id2] = mg.flipped;
+  const c1 = mg.cards.find(c => c.id === id1);
+  const c2 = mg.cards.find(c => c.id === id2);
+
+  const isMatch = c1.pairIdx === c2.pairIdx && c1.type !== c2.type;
+
+  if (isMatch) {
+    // Lock after a brief pause so player can see the match
+    setTimeout(() => lockMemoryPair(c1, c2), 0);
+    mg.flipped = [];
+    // Player goes again — re-enable clicks
+    document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.remove('no-click'));
+    setTurnIndicator('player');
+    botSetMsg('mg', 'Nice find! Your turn again.');
+  } else {
+    // Flip both back after 1.4s, then bot's turn
+    setTimeout(() => {
+      flipCard(id1, false);
+      flipCard(id2, false);
+      mg.flipped = [];
+      document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.remove('no-click'));
+      setTurnIndicator('bot');
+      botTurnMemory();
+    }, 1400);
+  }
+}
+
+/*
+  lockMemoryPair — marks both cards as locked, applies locked CSS,
+  awards points, updates counters.
+*/
+function lockMemoryPair(c1, c2) {
+  const mg = state.mg;
+  [c1, c2].forEach(card => {
+    card.locked = true;
+    const wrap = document.getElementById(`wrap-${card.id}`);
+    if (wrap) { wrap.classList.add('locked', 'is-flipped'); wrap.classList.remove('no-click'); }
+  });
+  mg.locked++;
+  mg.playerCorrect++;
+  addPoints('player', 10);
+  document.getElementById('mg-matched').textContent  = `${mg.locked} / 6`;
+  document.getElementById('mg-pcorrect').textContent = mg.playerCorrect;
+  toast(`Matched ${mg.pairs[c1.pairIdx].name}! +10 pts`, 'success');
+
+  if (mg.locked >= 6) {
+    setTimeout(() => showResults('matching'), 700);
+  }
+}
+
+/* ---------- Turn indicator ---------- */
+
+function setTurnIndicator(who) {
+  const badge = document.getElementById('mg-turn-badge');
+  if (who === 'player') {
+    badge.textContent = `${state.playerName}'s Turn`;
+    badge.className   = 'turn-badge player-turn';
+  } else {
+    badge.textContent = "BioBot's Turn";
+    badge.className   = 'turn-badge bot-turn';
+  }
+}
+
+/* ---------- Bot memory helpers ---------- */
+
+/*
+  updateBotMemory — 65% chance the bot remembers a newly revealed card.
+*/
+function updateBotMemory(card) {
+  if (Math.random() < 0.65) {
+    state.mg.botKnown.set(card.id, card.pairIdx);
+  }
+}
+
+/*
+  botPickMemoryCards — choose two card ids for the bot to play.
+  Strategy: if bot knows a complete pair (both a name+struct card
+  for the same pairIdx are in botKnown), play them. Otherwise pick
+  two random unmatched, unflipped cards.
+*/
+function botPickMemoryCards() {
+  const mg = state.mg;
+
+  // Build a map from pairIdx → {name:id, struct:id} for known cards
+  const knownByPair = new Map();
+  mg.botKnown.forEach((pairIdx, cardId) => {
+    const card = mg.cards.find(c => c.id === cardId);
+    if (!card || card.locked) return;
+    if (!knownByPair.has(pairIdx)) knownByPair.set(pairIdx, {});
+    knownByPair.get(pairIdx)[card.type] = cardId;
+  });
+
+  // Look for a complete known pair
+  for (const [, types] of knownByPair) {
+    if (types.name && types.struct) {
+      return [types.name, types.struct];
+    }
+  }
+
+  // Fall back to random selection among available cards
+  const available = mg.cards.filter(c => !c.locked && !c.flipped);
+  if (available.length < 2) return null;
+  const shuffled = shuffle(available);
+  return [shuffled[0].id, shuffled[1].id];
+}
+
+/* ---------- Bot turn ---------- */
+
+/*
+  botTurnMemory — runs the bot's turn with delays so the player can
+  watch. After resolving, either goes again (match) or returns turn
+  to the player.
+*/
+function botTurnMemory() {
+  const mg = state.mg;
+  if (mg.locked >= 6) return;
+
+  mg.botActive = true;
+  // Disable all card clicks during bot's turn
+  document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.add('no-click'));
+  botSetMsg('mg', 'My turn — let me think…');
+  document.getElementById('thinking-mg').style.display = 'flex';
+
+  mg.botTimer = setTimeout(() => {
+    document.getElementById('thinking-mg').style.display = 'none';
+
+    const picks = botPickMemoryCards();
+    if (!picks) {
+      // No cards left to play — end
+      mg.botActive = false;
+      setTurnIndicator('player');
+      document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.remove('no-click'));
+      return;
+    }
+
+    const [id1, id2] = picks;
+    const c1 = mg.cards.find(c => c.id === id1);
+    const c2 = mg.cards.find(c => c.id === id2);
+
+    // Flip first card
+    botSetMsg('mg', `Flipping a card…`);
+    flipCard(id1, true);
+    updateBotMemory(c1);
+
+    setTimeout(() => {
+      // Flip second card
+      flipCard(id2, true);
+      updateBotMemory(c2);
+
+      setTimeout(() => {
+        const isMatch = c1.pairIdx === c2.pairIdx && c1.type !== c2.type;
+
+        if (isMatch) {
+          // Lock the pair
+          [c1, c2].forEach(card => {
+            card.locked = true;
+            const wrap = document.getElementById(`wrap-${card.id}`);
+            if (wrap) wrap.classList.add('locked', 'is-flipped');
+          });
+          mg.locked++;
+          mg.botCorrect++;
+          addPoints('bot', 10);
+          document.getElementById('mg-matched').textContent  = `${mg.locked} / 6`;
+          document.getElementById('mg-bcorrect').textContent = mg.botCorrect;
+          toast(`BioBot matched ${mg.pairs[c1.pairIdx].name}!`, 'info');
+          botSetMsg('mg', `Got ${mg.pairs[c1.pairIdx].name}! My turn again.`);
+
+          if (mg.locked >= 6) {
+            mg.botActive = false;
+            setTimeout(() => showResults('matching'), 700);
+            return;
+          }
+
+          // Bot goes again
+          setTurnIndicator('bot');
+          document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.add('no-click'));
+          mg.botTimer = setTimeout(() => botTurnMemory(), 1200);
+
+        } else {
+          // No match — flip cards back, hand to player
+          setTimeout(() => {
+            flipCard(id1, false);
+            flipCard(id2, false);
+            mg.botActive = false;
+            setTurnIndicator('player');
+            document.querySelectorAll('.mem-card-wrap:not(.locked)').forEach(w => w.classList.remove('no-click'));
+            botSetMsg('mg', 'No match. Your turn!');
+          }, 1200);
+        }
+      }, 1200);
+    }, 1200);
+  }, 1500);
+}
+
+// ================================================================
+//  QUIZ GAME
+// ================================================================
+function startQuizGame() {
+  const qz = state.qz;
+  qz.questions         = shuffle(ALL_QUESTIONS).slice(0, 10);
+  qz.current           = 0;
+  qz.playerRoundScore  = 0;
+  qz.botRoundScore     = 0;
+  qz.answered          = false;
+  clearInterval(qz.timerInterval);
+  clearTimeout(qz.botTimer);
+
+  refreshAllScores();
+  showScreen('screen-quiz');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const qz = state.qz;
+  if (qz.current >= qz.questions.length) { endQuiz(); return; }
+
+  const q = qz.questions[qz.current];
+  qz.answered = false;
+  qz.timeLeft = 20;
+  clearInterval(qz.timerInterval);
+  clearTimeout(qz.botTimer);
+
+  const label = `Question ${qz.current + 1} of ${qz.questions.length}`;
+  document.getElementById('qz-q-label').textContent      = label;
+  document.getElementById('qz-header-label').textContent  = label;
+  document.getElementById('qz-question').textContent      = q.q;
+  document.getElementById('qz-timer-fill').style.width   = '100%';
+  document.getElementById('qz-timer-fill').classList.remove('urgent');
+  document.getElementById('qz-timer-label').textContent  = '⏱ 20s';
+  document.getElementById('qz-feedback').style.display   = 'none';
+  document.getElementById('qz-feedback').className       = 'feedback-box';
+  document.getElementById('qz-next-btn').style.display   = 'none';
+  document.getElementById('thinking-qz').style.display   = 'none';
+  botSetMsg('qz', 'Reading the question…');
+
+  // Render shuffled options
+  const optEl = document.getElementById('qz-options');
+  optEl.innerHTML = '';
+  shuffle(q.options).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.textContent = opt;
+    btn.onclick = () => playerAnswer(opt);
+    optEl.appendChild(btn);
+  });
+
+  // Countdown timer
+  qz.timerInterval = setInterval(() => {
+    qz.timeLeft--;
+    const pct  = (qz.timeLeft / 20) * 100;
+    const fill = document.getElementById('qz-timer-fill');
+    fill.style.width = pct + '%';
+    document.getElementById('qz-timer-label').textContent = `⏱ ${qz.timeLeft}s`;
+    if (qz.timeLeft <= 7) fill.classList.add('urgent');
+    if (qz.timeLeft <= 0) { clearInterval(qz.timerInterval); if (!qz.answered) timedOut(); }
+  }, 1000);
+
+  // Bot answers after a random delay (70% accuracy)
+  qz.botTimer = setTimeout(() => {
+    if (!qz.answered) botAnswerQuiz(false);
+  }, rand(5000, 17000));
+}
+
+function playerAnswer(selected) {
+  const qz = state.qz;
+  if (qz.answered) return;
+  qz.answered = true;
+  clearInterval(qz.timerInterval);
+  clearTimeout(qz.botTimer);
+
+  const q         = qz.questions[qz.current];
+  const correct   = selected.trim() === q.a.trim();
+  const timeBonus = Math.floor(qz.timeLeft / 4);
+
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.trim() === q.a.trim()) btn.classList.add('correct');
+    else if (btn.textContent.trim() === selected.trim() && !correct) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('qz-feedback');
+  fb.style.display = 'block';
+  if (correct) {
+    const pts = 10 + timeBonus;
+    addPoints('player', pts);
+    qz.playerRoundScore += pts;
+    fb.className = 'feedback-box correct-fb';
+    fb.innerHTML = `<strong style="color:var(--success)">Correct! +${pts} pts${timeBonus ? ` (+${timeBonus} time bonus)` : ''}</strong><br><br>${q.explain}`;
+  } else {
+    fb.className = 'feedback-box wrong-fb';
+    fb.innerHTML = `<strong style="color:var(--danger)">Incorrect.</strong> The answer is: <strong>${q.a}</strong><br><br>${q.explain}`;
+  }
+
+  botAnswerQuiz(true);
+  document.getElementById('qz-next-btn').style.display = 'block';
+}
+
+function timedOut() {
+  const qz = state.qz;
+  qz.answered = true;
+  clearTimeout(qz.botTimer);
+
+  const q = qz.questions[qz.current];
+  document.querySelectorAll('.opt-btn').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.trim() === q.a.trim()) btn.classList.add('correct');
+  });
+
+  const fb = document.getElementById('qz-feedback');
+  fb.style.display = 'block';
+  fb.className = 'feedback-box wrong-fb';
+  fb.innerHTML = `<strong style="color:var(--danger)">Time's up!</strong> The answer was: <strong>${q.a}</strong><br><br>${q.explain}`;
+
+  botAnswerQuiz(true);
+  document.getElementById('qz-next-btn').style.display = 'block';
+}
+
+function botAnswerQuiz(silent) {
+  const qz = state.qz;
+  if (!silent) {
+    document.getElementById('thinking-qz').style.display = 'flex';
+    botSetMsg('qz', 'I have my answer!');
+  }
+  const doScore = () => {
+    document.getElementById('thinking-qz').style.display = 'none';
+    const botCorrect = Math.random() < 0.70;
+    if (botCorrect) {
+      const bonus = silent ? 0 : Math.floor(qz.timeLeft / 4);
+      addPoints('bot', 10 + bonus);
+      qz.botRoundScore += 10;
+      botSetMsg('qz', silent ? 'I got that one right.' : `Answered correctly! +${10 + bonus} pts`);
+    } else {
+      botSetMsg('qz', 'I got that wrong.');
+    }
+  };
+  if (silent) doScore();
+  else setTimeout(doScore, 1000);
+}
+
+function nextQuestion() {
+  state.qz.current++;
+  renderQuestion();
+}
+
+function endQuiz() {
+  clearInterval(state.qz.timerInterval);
+  clearTimeout(state.qz.botTimer);
+  showResults('quiz');
+}
+
+// ================================================================
+//  RESULTS SCREEN
+// ================================================================
+function showResults(gameType) {
+  const p = state.playerScore;
+  const b = state.botScore;
+
+  let trophy, title, sub;
+  if      (p > b) { trophy = '🏆'; title = `${state.playerName} Wins!`; sub = 'You beat BioBot!'; }
+  else if (b > p) { trophy = '🤖'; title = 'BioBot Wins!';              sub = 'Better luck next round!'; }
+  else            { trophy = '🤝'; title = "It's a Tie!";               sub = 'Evenly matched!'; }
+
+  document.getElementById('result-trophy').textContent = trophy;
+  document.getElementById('result-title').textContent  = title;
+  document.getElementById('result-sub').textContent    = sub;
+  document.getElementById('r-pscore').textContent      = p;
+  document.getElementById('r-bscore').textContent      = b;
+  document.getElementById('r-pname').textContent       = state.playerName;
+
+  const pc = document.getElementById('r-player-card');
+  const bc = document.getElementById('r-bot-card');
+  pc.classList.toggle('winner', p > b);
+  bc.classList.toggle('winner', b > p);
+
+  const bd = document.getElementById('r-breakdown');
+  if (gameType === 'matching') {
+    const mg = state.mg;
+    bd.innerHTML = `
+      <p style="font-weight:700; margin-bottom:0.6rem;">Memory Match Breakdown</p>
+      <p>Total pairs: <strong>6</strong></p>
+      <p>Your matched pairs: <strong>${mg.playerCorrect}</strong></p>
+      <p>BioBot's matched pairs: <strong>${mg.botCorrect}</strong></p>
+    `;
+  } else {
+    const qz = state.qz;
+    bd.innerHTML = `
+      <p style="font-weight:700; margin-bottom:0.6rem;">Quiz Breakdown</p>
+      <p>Questions answered: <strong>${qz.current}</strong></p>
+      <p>Your quiz score: <strong>${qz.playerRoundScore} pts</strong></p>
+      <p>BioBot's quiz score: <strong>${qz.botRoundScore} pts</strong></p>
+    `;
+  }
+
+  // Quick reference sheet
+  const ref = document.getElementById('r-ref');
+  ref.innerHTML = AMINO_ACIDS.map(aa => `
+    <div class="ref-item">
+      <span style="font-weight:700;">${aa.name}</span>
+      <span class="muted"> (${aa.abbr3}, ${aa.abbr1})</span><br>
+      <span style="color:var(--${catColour(aa.category)}); font-size:0.75rem;">${catLabel(aa.category)}</span>
+    </div>
+  `).join('');
+
+  showScreen('screen-results');
+}
+
+// ================================================================
+//  BOT MESSAGE HELPER
+// ================================================================
+function botSetMsg(game, msg) {
+  document.getElementById(`bot-msg-${game}`).textContent = msg;
+}
+
+// ================================================================
+//  KEYBOARD — Enter key on home screen
+// ================================================================
+document.getElementById('player-name').addEventListener('keypress', e => {
+  if (e.key === 'Enter') startSession();
+});
+
+// ================================================================
+//  LAB EXPLORER — MAP DATA
+//  1 = wall, 0 = floor  (20 columns × 15 rows)
+// ================================================================
+const MAP_DATA = [
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+  [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1],
+  [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1],
+  [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,1,0,0,0,0,0,0,0,1,0,0,0,0,0,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,0,1,1,1,0,1,1,0,1,1,0,1,1,1,0,1,1,1],
+  [1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1],
+  [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+];
+const MAP_COLS = 20, MAP_ROWS = 15, TILE = 32;
+
+// ================================================================
+//  CHEST DEFINITIONS
+//  difficulty: 'easy' | 'medium' | 'hard'
+//  easy   → random text question only
+//  medium → text question + identify the correct SVG structure
+//  hard   → text question + connect-the-dots side-chain drawing
+//  qPool  → 3 questions per chest, one picked randomly each visit
+//  drawDots (hard only) → {hint, nodes:[{x,y,label,color}], bonds:[[a,b],...]}
+// ================================================================
+const CHEST_DEFS = [
+  // ── EASY chests ─────────────────────────────────────────────
+  { col:2,  row:2,  aaIdx:0, difficulty:'easy', qPool:[
+    { q:"What is unique about Glycine compared to all other amino acids?",
+      a:"It has no side chain — just a hydrogen",
+      opts:["It has no side chain — just a hydrogen","It has a benzene ring","It is always positively charged","It forms disulfide bonds"],
+      exp:"Glycine's R-group is just –H, making it the smallest amino acid and the only one with no chiral centre." },
+    { q:"Glycine is the only amino acid without a chiral centre. Why?",
+      a:"Both substituents on Cα are hydrogen — identical",
+      opts:["Both substituents on Cα are hydrogen — identical","It has a ring structure","It is the largest amino acid","It has no nitrogen"],
+      exp:"A chiral centre needs four DIFFERENT groups. Glycine's Cα has two identical H atoms, so there is no L or D form." },
+    { q:"Glycine provides maximum backbone flexibility in proteins. Why?",
+      a:"Its tiny H side chain imposes no steric restriction",
+      opts:["Its tiny H side chain imposes no steric restriction","It carries a positive charge","It forms disulfide bonds","It has a rigid ring"],
+      exp:"Large side chains restrict backbone rotation. Glycine's single H allows any conformation — important in tight protein turns." }
+  ]},
+  { col:9,  row:2,  aaIdx:1, difficulty:'easy', qPool:[
+    { q:"What is Alanine's side chain?",
+      a:"A methyl group (–CH₃)",
+      opts:["A methyl group (–CH₃)","A hydroxyl group (–OH)","A thiol group (–SH)","An amino group (–NH₂)"],
+      exp:"Alanine has just a methyl (–CH₃) side chain — the simplest nonpolar side chain after Glycine's H." },
+    { q:"Alanine is described as 'nonpolar'. What does this mean for its behaviour in a protein?",
+      a:"It avoids water and is found buried inside the protein core",
+      opts:["It avoids water and is found buried inside the protein core","It carries a negative charge","It forms hydrogen bonds with water","It always sits on the protein surface"],
+      exp:"Nonpolar side chains lack partial charges and cannot hydrogen-bond with water — they cluster inside protein cores away from the aqueous environment." },
+    { q:"Which category does Alanine belong to?",
+      a:"Nonpolar (hydrophobic)",
+      opts:["Nonpolar (hydrophobic)","Polar uncharged","Positively charged","Negatively charged"],
+      exp:"Alanine's methyl group is completely nonpolar. It is one of the most abundant amino acids found in protein interiors." }
+  ]},
+  { col:2,  row:6,  aaIdx:3, difficulty:'easy', qPool:[
+    { q:"Serine has a –OH (hydroxyl) group. Why does this make it 'polar'?",
+      a:"–OH can form hydrogen bonds with water",
+      opts:["–OH can form hydrogen bonds with water","–OH carries a full negative charge","–OH makes it hydrophobic","–OH releases a proton at all pH values"],
+      exp:"The –OH group has a partial negative charge on O and partial positive on H, allowing strong hydrogen bonds with water." },
+    { q:"Serine is often 'phosphorylated' in cell signalling. What does this mean?",
+      a:"A phosphate group (–PO₄) is attached to its –OH",
+      opts:["A phosphate group (–PO₄) is attached to its –OH","It loses its side chain","It becomes positively charged","It forms a ring structure"],
+      exp:"Kinase enzymes attach a phosphate to Serine's –OH, switching proteins on or off. This is one of the most common regulatory mechanisms in cells." },
+    { q:"Serine proteases use Serine as their catalytic residue. What do proteases do?",
+      a:"They cut (cleave) peptide bonds in other proteins",
+      opts:["They cut (cleave) peptide bonds in other proteins","They build new proteins from amino acids","They transport oxygen in blood","They store energy as fat"],
+      exp:"Serine's –OH is reactive enough to attack peptide bonds. Serine proteases (trypsin, chymotrypsin) are essential digestive and signalling enzymes." }
+  ]},
+  { col:16, row:6,  aaIdx:4, difficulty:'easy', qPool:[
+    { q:"Lysine carries a positive charge at body pH. What group causes this?",
+      a:"–NH₃⁺ (protonated amino group at the chain end)",
+      opts:["–NH₃⁺ (protonated amino group at the chain end)","–COO⁻ (carboxyl group)","–SH (thiol group)","–OH (hydroxyl group)"],
+      exp:"Lysine's long side chain ends in –NH₂. At body pH (~7.4), this picks up a proton to become –NH₃⁺, carrying a positive charge." },
+    { q:"Lysine is an 'essential' amino acid. What does essential mean in nutrition?",
+      a:"The body cannot make it — must come from food",
+      opts:["The body cannot make it — must come from food","It is the most abundant amino acid","It is found only in plants","It is always negatively charged"],
+      exp:"9 amino acids are essential — the body lacks the enzymes to synthesise them from scratch. Lysine must come from protein-rich foods like meat, fish, eggs, and legumes." },
+    { q:"Which category of food is particularly low in Lysine, making it a limiting amino acid?",
+      a:"Grains and cereals (wheat, rice, maize)",
+      opts:["Grains and cereals (wheat, rice, maize)","Meat and fish","Dairy products","Eggs and poultry"],
+      exp:"Most plant proteins are low in Lysine. Combining grains (low Lys) with legumes (high Lys) gives a complete amino acid profile — the basis of many traditional diets." }
+  ]},
+
+  // ── MEDIUM chests (text question + structure identifier) ─────
+  { col:16, row:2,  aaIdx:2, difficulty:'medium', qPool:[
+    { q:"Cysteine can form a special bond with another Cysteine. What is this bond called?",
+      a:"Disulfide bond (–S–S–)",
+      opts:["Disulfide bond (–S–S–)","Hydrogen bond","Ionic bond","Peptide bond"],
+      exp:"Two –SH (thiol) groups oxidise to form –S–S–, a covalent disulfide bond that locks protein 3D shape (e.g. insulin, antibodies)." },
+    { q:"What chemical group in Cysteine enables disulfide bond formation?",
+      a:"Thiol (–SH) group",
+      opts:["Thiol (–SH) group","Hydroxyl (–OH) group","Amino (–NH₂) group","Benzene ring"],
+      exp:"The –SH (thiol) group is a reactive sulfur-containing functional group. Two thiols lose H atoms and bond to form –S–S– (disulfide bridge)." },
+    { q:"What type of chemical reaction forms a disulfide bond between two Cysteines?",
+      a:"Oxidation (loss of two hydrogen atoms)",
+      opts:["Oxidation (loss of two hydrogen atoms)","Reduction (gain of hydrogen)","Hydrolysis (addition of water)","Phosphorylation (addition of phosphate)"],
+      exp:"–SH + HS– → –S–S– + 2H⁺ + 2e⁻. This is oxidation. The reverse (breaking –S–S– back to –SH) is reduction." }
+  ]},
+  { col:2,  row:10, aaIdx:5, difficulty:'medium', qPool:[
+    { q:"Aspartic Acid is negatively charged at body pH. What group causes this charge?",
+      a:"–COO⁻ (carboxylate group)",
+      opts:["–COO⁻ (carboxylate group)","–NH₃⁺ (amino group)","–SH (thiol group)","–OH (hydroxyl group)"],
+      exp:"Aspartic acid's side chain –COOH has a pKa of ~3.9. At body pH 7.4 it donates its proton, leaving –COO⁻ (negative charge)." },
+    { q:"Aspartic Acid is found in the sweetener aspartame. Why must people with PKU avoid aspartame?",
+      a:"Aspartame also contains Phenylalanine, which PKU patients cannot break down",
+      opts:["Aspartame also contains Phenylalanine, which PKU patients cannot break down","They are allergic to Aspartic Acid","Aspartame is too sweet","It disrupts their sleep"],
+      exp:"PKU (phenylketonuria) patients lack phenylalanine hydroxylase. Aspartame = Asp + Phe + methanol — the Phe content triggers the warning label, not the Asp." },
+    { q:"In enzyme active sites, Aspartic Acid's negative charge is often used to:",
+      a:"Coordinate metal ions and act as a base catalyst",
+      opts:["Coordinate metal ions and act as a base catalyst","Repel all water molecules","Form ring structures","Create covalent bonds with DNA"],
+      exp:"Asp's –COO⁻ coordinates Ca²⁺/Mg²⁺ cofactors and acts as a catalytic base in proteases like pepsin and HIV protease." }
+  ]},
+  { col:16, row:10, aaIdx:7, difficulty:'medium', qPool:[
+    { q:"Tryptophan is the precursor to serotonin. What is serotonin's primary role?",
+      a:"Mood regulation and wellbeing (neurotransmitter)",
+      opts:["Mood regulation and wellbeing (neurotransmitter)","Digesting food in the stomach","Building bone structure","Carrying oxygen in blood"],
+      exp:"Tryptophan → 5-HTP → Serotonin. Serotonin regulates mood, sleep, and appetite. Low dietary tryptophan can affect mental health." },
+    { q:"Tryptophan also makes melatonin. What does melatonin regulate?",
+      a:"Sleep-wake cycles (circadian rhythm)",
+      opts:["Sleep-wake cycles (circadian rhythm)","Blood glucose levels","Muscle contraction","Bone density"],
+      exp:"Tryptophan → Serotonin → Melatonin (in the pineal gland at night). Melatonin signals darkness and promotes sleep onset." },
+    { q:"Tryptophan has the largest side chain of all 20 amino acids. What ring system does it contain?",
+      a:"Indole — a benzene ring fused with a pyrrole ring (contains N)",
+      opts:["Indole — a benzene ring fused with a pyrrole ring (contains N)","A plain benzene ring only","A 5-membered ring with no nitrogen","A pyrrolidine ring like Proline"],
+      exp:"Indole = 6-membered benzene ring fused with 5-membered pyrrole (4C + 1N). This large aromatic bicycle makes Trp the bulkiest amino acid." }
+  ]},
+
+  // ── HARD chests (text question + connect-the-dots drawing) ───
+  { col:9,  row:10, aaIdx:6, difficulty:'hard',
+    drawDots: {
+      hint: "Phenylalanine's side chain: a 2-carbon chain (Cα→C) connected to a 6-membered benzene ring. Draw the chain bond AND all 6 ring bonds!",
+      nodes: [
+        {x:15,  y:70, label:"Cα", color:"#94a3b8"},
+        {x:55,  y:70, label:"C",  color:"#94a3b8"},
+        {x:140, y:38, label:"",   color:"#fb923c"},
+        {x:168, y:54, label:"",   color:"#fb923c"},
+        {x:168, y:86, label:"",   color:"#fb923c"},
+        {x:140, y:102,label:"",   color:"#fb923c"},
+        {x:112, y:86, label:"",   color:"#fb923c"},
+        {x:112, y:54, label:"",   color:"#fb923c"},
+      ],
+      bonds: [[0,1],[1,7],[7,2],[2,3],[3,4],[4,5],[5,6],[6,7]]
+    },
+    qPool:[
+      { q:"Phenylalanine contains a benzene ring. This makes it 'aromatic'. What does aromatic mean chemically?",
+        a:"A ring with delocalised electrons (alternating single/double bonds)",
+        opts:["A ring with delocalised electrons (alternating single/double bonds)","It smells like flowers","It is always positively charged","It is the largest amino acid"],
+        exp:"Aromatic = cyclic ring with delocalised π electrons. The benzene ring's 6 electrons are spread evenly around the ring, giving it unusual stability." },
+      { q:"Phenylalanine is a precursor to which important neurotransmitters?",
+        a:"Dopamine and Adrenaline (via Tyrosine)",
+        opts:["Dopamine and Adrenaline (via Tyrosine)","Serotonin and Melatonin","GABA and Glutamate","Acetylcholine only"],
+        exp:"Phe → Tyrosine → DOPA → Dopamine → Noradrenaline → Adrenaline. Phenylalanine starts the entire catecholamine biosynthetic pathway." },
+      { q:"How many of the 20 standard amino acids are 'essential' (cannot be made by the human body)?",
+        a:"9",
+        opts:["9","5","15","20"],
+        exp:"The 9 essential AAs: His, Ile, Leu, Lys, Met, Phe, Thr, Trp, Val. The body cannot synthesise these — they must come from diet." }
+    ]
+  },
+  { col:6,  row:13, aaIdx:8, difficulty:'hard',
+    drawDots: {
+      hint: "Proline forms a RING that connects back to the backbone nitrogen (N). Draw all 5 bonds — the ring must close back to N!",
+      nodes: [
+        {x:22,  y:70, label:"N",  color:"#60a5fa"},
+        {x:68,  y:38, label:"C",  color:"#fb923c"},
+        {x:122, y:50, label:"C",  color:"#fb923c"},
+        {x:116, y:96, label:"C",  color:"#fb923c"},
+        {x:60,  y:100,label:"C",  color:"#fb923c"},
+      ],
+      bonds: [[0,1],[1,2],[2,3],[3,4],[4,0]]
+    },
+    qPool:[
+      { q:"Proline's side chain loops back to bond with the backbone nitrogen. What structural effect does this cause?",
+        a:"A rigid kink that breaks alpha-helices and beta-sheets",
+        opts:["A rigid kink that breaks alpha-helices and beta-sheets","A longer, more flexible chain","A positive charge on the protein","Disulfide bridges"],
+        exp:"Proline's cyclic ring prevents rotation around the N-Cα bond and removes the backbone N-H, so it cannot maintain helix or sheet hydrogen bonds." },
+      { q:"Collagen (in skin, tendons) is the most abundant protein in the body. Which amino acids dominate its sequence?",
+        a:"Glycine (~33%) and Proline (~13%)",
+        opts:["Glycine (~33%) and Proline (~13%)","Lysine and Arginine","Cysteine and Methionine","Tryptophan and Phenylalanine"],
+        exp:"Collagen repeats Gly-X-Pro triplets. Proline and hydroxyproline lock the triple-helix. Glycine's small size fits at the helix centre." },
+      { q:"Because Proline cannot donate a backbone N-H hydrogen bond, what secondary structure does it disrupt?",
+        a:"Alpha-helix (requires N-H···O=C bonds every 4 residues)",
+        opts:["Alpha-helix (requires N-H···O=C bonds every 4 residues)","Beta-sheet only","Random coil","Triple helix"],
+        exp:"Alpha-helices require N-H donor bonds from every residue. Proline's N has no H (it's bonded into the ring), so it breaks the helix — often called a 'helix breaker'." }
+    ]
+  },
+  // ── NEW EASY chests (aaIdx 10–11, 13, 15) ────────────────────
+  { col:4,  row:1,  aaIdx:10, difficulty:'easy', qPool:[
+    { q:"Valine is a 'branched-chain amino acid' (BCAA). What does 'branched-chain' mean?",
+      a:"Its side chain has a fork — a CH connecting to two CH₃ groups",
+      opts:["Its side chain has a fork — a CH connecting to two CH₃ groups","It contains sulfur","It has a benzene ring","It is always positively charged"],
+      exp:"Branched-chain means the carbon chain forks. Valine's side chain is –CH(CH₃)₂ — an isopropyl group with a V-shaped branch." },
+    { q:"Why do athletes supplement with BCAAs like Valine, Leucine, and Isoleucine?",
+      a:"They are directly oxidised as fuel in muscle and signal protein synthesis",
+      opts:["They are directly oxidised as fuel in muscle and signal protein synthesis","They create disulfide bonds in tendons","They increase serotonin","They carry oxygen"],
+      exp:"Muscle cells can directly oxidise BCAAs for energy without first processing them in the liver. They also activate anabolic (muscle-building) signalling." },
+    { q:"What category does Valine belong to?",
+      a:"Nonpolar (hydrophobic)",
+      opts:["Nonpolar (hydrophobic)","Polar uncharged","Positively charged","Negatively charged"],
+      exp:"Valine's branched aliphatic side chain has no polar groups. It prefers the hydrophobic interior of folded proteins." }
+  ]},
+  { col:9,  row:1,  aaIdx:11, difficulty:'easy', qPool:[
+    { q:"Leucine uniquely activates mTOR. What does mTOR control?",
+      a:"Muscle protein synthesis — the master switch for building new muscle",
+      opts:["Muscle protein synthesis — the master switch for building new muscle","Blood pressure","Oxygen transport","Fat digestion"],
+      exp:"mTOR (mechanistic target of rapamycin) is the master regulator of muscle protein synthesis. Leucine is the most potent BCAA activator of mTOR." },
+    { q:"What is Leucine's side chain structure?",
+      a:"A 4-carbon branched chain (–CH₂–CH(CH₃)₂)",
+      opts:["A 4-carbon branched chain (–CH₂–CH(CH₃)₂)","A chain with sulfur","A hydroxyl group","An imidazole ring"],
+      exp:"Leucine has an isobutyl side chain: –CH₂–CH(CH₃)₂. The branch is one carbon further from Cα than in Valine." },
+    { q:"Which one-letter code represents Leucine in protein sequences?",
+      a:"L",
+      opts:["L","Le","U","X"],
+      exp:"Leucine = L. One-letter codes are used in sequence databases and BLAST searches. Note: Lysine = K, not L." }
+  ]},
+  { col:4,  row:5,  aaIdx:13, difficulty:'easy', qPool:[
+    { q:"How is Threonine structurally different from Serine?",
+      a:"Threonine has an extra methyl group (–CH₃) on the same carbon as the –OH",
+      opts:["Threonine has an extra methyl group (–CH₃) on the same carbon as the –OH","Threonine has two –OH groups","Threonine has sulfur instead of oxygen","They are identical"],
+      exp:"Serine: –CH₂–OH. Threonine: –CH(OH)–CH₃. The extra methyl makes Threonine bulkier and gives it two chiral centres." },
+    { q:"Threonine is one of 9 essential amino acids. What does this mean for your diet?",
+      a:"You must eat foods containing Threonine — the body cannot synthesise it",
+      opts:["You must eat foods containing Threonine — the body cannot synthesise it","It is the most abundant amino acid","It is only found in plants","It can be made from Serine"],
+      exp:"Essential amino acids lack the biosynthetic enzymes to make them from scratch. Threonine is found in meat, dairy, eggs, and legumes." },
+    { q:"Like Serine, Threonine can be phosphorylated. What enzyme adds the phosphate?",
+      a:"A kinase enzyme",
+      opts:["A kinase enzyme","A protease","RNA polymerase","A hydrolase"],
+      exp:"Kinases catalyse: Thr–OH + ATP → Thr–OPO₃²⁻ + ADP. Phospho-Thr is key in cell-cycle regulation (e.g. CDK substrates)." }
+  ]},
+  { col:14, row:5,  aaIdx:15, difficulty:'easy', qPool:[
+    { q:"Asparagine's side chain ends in –CONH₂. What important post-translational modification happens here?",
+      a:"N-linked glycosylation — sugar chains attach to its amide nitrogen",
+      opts:["N-linked glycosylation — sugar chains attach to its amide nitrogen","Disulfide bond formation","Phosphorylation","Methylation"],
+      exp:"N-linked glycosylation: enzyme OST attaches oligosaccharides to the N of Asn's –CONH₂. The Asn-X-Ser/Thr sequon is the recognition signal." },
+    { q:"Asparagine is the amide version of which charged amino acid?",
+      a:"Aspartic Acid (Asp, D)",
+      opts:["Aspartic Acid (Asp, D)","Glutamic Acid (Glu, E)","Lysine (Lys, K)","Arginine (Arg, R)"],
+      exp:"Asparagine (Asn, N) = Aspartic Acid with –COOH replaced by –CONH₂. Similarly, Glutamine (Gln) is the amide of Glutamic Acid." },
+    { q:"Asparagine spontaneously deamidates over time. What does deamidation do?",
+      a:"Converts –CONH₂ to –COOH, turning Asn into Asp",
+      opts:["Converts –CONH₂ to –COOH, turning Asn into Asp","Breaks the peptide bond","Adds phosphate","Forms disulfide bonds"],
+      exp:"Deamidation removes –NH₂, converting Asn to Asp. This is a key protein ageing reaction used in forensic dating of ancient proteins." }
+  ]},
+
+  // ── NEW MEDIUM chests (aaIdx 12, 16, 17) ─────────────────────
+  { col:14, row:1,  aaIdx:12, difficulty:'medium', qPool:[
+    { q:"Isoleucine has TWO chiral centres. How many stereoisomers does this allow?",
+      a:"4 possible stereoisomers (2² = 4)",
+      opts:["4 possible stereoisomers (2² = 4)","2 stereoisomers","8 stereoisomers","1 — no chirality"],
+      exp:"With 2 chiral centres, n=2, so 2² = 4 stereoisomers exist. Only (2S,3R)-Isoleucine (L-Ile) appears naturally in proteins." },
+    { q:"What makes Isoleucine structurally distinct from Valine and Leucine?",
+      a:"Its side chain branches at the beta-carbon (Cβ) AND continues further as –CH₂–CH₃",
+      opts:["Its side chain branches at the beta-carbon (Cβ) AND continues further as –CH₂–CH₃","It contains sulfur","It has a hydroxyl group","It forms ring structures"],
+      exp:"Isoleucine: –CH(CH₃)–CH₂–CH₃ (branch at Cβ with an ethyl tail). Valine also branches at Cβ but has no ethyl extension." },
+    { q:"A Glu→Val mutation causes sickle cell anaemia. What property change does this represent?",
+      a:"Negative/hydrophilic (Glu) → Nonpolar/hydrophobic (Val) — makes haemoglobin aggregate",
+      opts:["Negative/hydrophilic (Glu) → Nonpolar/hydrophobic (Val) — makes haemoglobin aggregate","Polar → Charged","Nonpolar → Positive","Small → Large"],
+      exp:"Normal haemoglobin β6 = Glu (charged, hydrophilic). Val (nonpolar) replacement creates a sticky hydrophobic patch — haemoglobin fibres form under low O₂, deforming red blood cells." }
+  ]},
+  { col:4,  row:9,  aaIdx:16, difficulty:'medium', qPool:[
+    { q:"Glutamine is the most abundant free amino acid in blood. What is its primary transport role?",
+      a:"It safely carries nitrogen (as amide –NH₂) between tissues",
+      opts:["It safely carries nitrogen (as amide –NH₂) between tissues","It carries oxygen","It is the main structural protein in muscle","It converts fat to glucose"],
+      exp:"Free ammonia (NH₃) is toxic. The body attaches NH₃ onto glutamate to make Glutamine, which safely transports N to the liver and kidneys for disposal or reuse." },
+    { q:"Rapidly dividing cells (cancer, immune, gut epithelium) heavily consume which amino acid as fuel?",
+      a:"Glutamine — these cells are 'glutamine-addicted'",
+      opts:["Glutamine — these cells are 'glutamine-addicted'","Glycine","Cysteine","Alanine"],
+      exp:"Rapidly dividing cells consume Glutamine for energy (TCA cycle), nucleotide synthesis, and as a nitrogen donor. Blocking glutamine uptake is a cancer therapy target." },
+    { q:"Glutamine is the amide of which negatively-charged amino acid?",
+      a:"Glutamic Acid (Glu, E)",
+      opts:["Glutamic Acid (Glu, E)","Aspartic Acid (Asp, D)","Lysine (Lys, K)","Glycine (Gly, G)"],
+      exp:"Glutamine (Gln, Q) = Glutamic Acid with –COOH replaced by –CONH₂. Gln is one carbon longer than Asparagine (which is the amide of Aspartic Acid)." }
+  ]},
+  { col:14, row:9,  aaIdx:17, difficulty:'medium', qPool:[
+    { q:"Glutamic acid (glutamate) is the brain's PRIMARY excitatory neurotransmitter. What does excitatory mean?",
+      a:"It depolarises neurons, increasing the chance they fire an action potential",
+      opts:["It depolarises neurons, increasing the chance they fire an action potential","It prevents neurons from firing","It repairs damaged neurons","It carries oxygen to the brain"],
+      exp:"Glutamate binds NMDA, AMPA and kainate receptors, opening ion channels that allow Na⁺/Ca²⁺ in — depolarising the neuron. GABA does the opposite (inhibitory)." },
+    { q:"MSG (monosodium glutamate) tastes 'savoury' (umami). What amino acid is MSG?",
+      a:"Glutamic Acid — MSG is its sodium salt",
+      opts:["Glutamic Acid — MSG is its sodium salt","Glutamine","Aspartic Acid","Lysine"],
+      exp:"MSG = Na⁺ + glutamate⁻. The umami receptor T1R1/T1R3 detects glutamate. Glutamic acid is abundant in tomatoes, parmesan, and fermented foods." },
+    { q:"How is Glutamic Acid structurally different from Aspartic Acid?",
+      a:"Glutamic Acid has one extra –CH₂– group (3-carbon chain vs 2-carbon)",
+      opts:["Glutamic Acid has one extra –CH₂– group (3-carbon chain vs 2-carbon)","Glutamic Acid has two –COOH groups","Aspartic Acid has sulfur","They are identical in size"],
+      exp:"Asp: –CH₂–COO⁻ (2 chain atoms). Glu: –CH₂–CH₂–COO⁻ (3 chain atoms). Both have pKa ~3.9–4.1 for their –COOH, so both carry –1 charge at pH 7.4." }
+  ]},
+
+  // ── NEW HARD chests (aaIdx 14, 18, 19) ───────────────────────
+  { col:9,  row:5,  aaIdx:14, difficulty:'hard',
+    drawDots: {
+      hint:"Tyrosine's side chain: a 2-carbon chain (Cα→Cβ) connects to a benzene ring (6 nodes). Draw the chain bonds, all 6 ring bonds, AND the para-OH bond (the O coming off the far ring vertex)!",
+      nodes:[
+        {x:10,  y:70, label:"Cα", color:"#94a3b8"},
+        {x:44,  y:70, label:"Cβ", color:"#94a3b8"},
+        {x:72,  y:70, label:"",   color:"#fb923c"},
+        {x:86,  y:46, label:"",   color:"#fb923c"},
+        {x:114, y:46, label:"",   color:"#fb923c"},
+        {x:128, y:70, label:"",   color:"#fb923c"},
+        {x:114, y:94, label:"",   color:"#fb923c"},
+        {x:86,  y:94, label:"",   color:"#fb923c"},
+        {x:162, y:70, label:"O",  color:"#ef4444"},
+      ],
+      bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,2],[5,8]]
+    },
+    qPool:[
+      { q:"What is the structural difference between Tyrosine and Phenylalanine?",
+        a:"Tyrosine has a hydroxyl (–OH) group at the para position of the benzene ring",
+        opts:["Tyrosine has a hydroxyl (–OH) group at the para position of the benzene ring","Tyrosine has two benzene rings","Tyrosine lacks a benzene ring","Phenylalanine is larger"],
+        exp:"Phe = benzene ring (nonpolar). Tyr = benzene ring + para-OH (polar). The –OH makes Tyr capable of hydrogen bonding and phosphorylation." },
+      { q:"Tyrosine can be phosphorylated at its –OH group. What type of enzyme does this?",
+        a:"A tyrosine kinase",
+        opts:["A tyrosine kinase","A serine protease","DNA ligase","RNA polymerase"],
+        exp:"Tyrosine kinases (e.g. EGFR, insulin receptor) attach phosphate to Tyr–OH. They are frequently mutated in cancer — key drug targets (e.g. imatinib/Gleevec)." },
+      { q:"Tyrosine is a precursor to which neurotransmitters?",
+        a:"Dopamine, Noradrenaline, and Adrenaline (catecholamines)",
+        opts:["Dopamine, Noradrenaline, and Adrenaline (catecholamines)","Serotonin and Melatonin","GABA and Glycine","Acetylcholine only"],
+        exp:"Tyr → DOPA → Dopamine → Noradrenaline → Adrenaline. Tyrosine also makes thyroid hormones (T3, T4). Phenylalanine is converted to Tyr first." }
+    ]
+  },
+  { col:4,  row:13, aaIdx:18, difficulty:'hard',
+    drawDots: {
+      hint:"Arginine's side chain: a 3-carbon chain (Cα→Cβ→Cγ) leading to a nitrogen (N-ε), then the guanidinium carbon (C-ζ) that forks to TWO nitrogens. Draw all 6 bonds!",
+      nodes:[
+        {x:10,  y:70, label:"Cα",  color:"#94a3b8"},
+        {x:44,  y:70, label:"Cβ",  color:"#94a3b8"},
+        {x:78,  y:70, label:"Cγ",  color:"#94a3b8"},
+        {x:112, y:70, label:"N",   color:"#60a5fa"},
+        {x:146, y:70, label:"C",   color:"#fb923c"},
+        {x:178, y:48, label:"N",   color:"#60a5fa"},
+        {x:178, y:92, label:"N",   color:"#60a5fa"},
+      ],
+      bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[4,6]]
+    },
+    qPool:[
+      { q:"Arginine is the precursor to Nitric Oxide (NO). What does NO do in blood vessels?",
+        a:"NO relaxes (dilates) blood vessel walls, reducing blood pressure",
+        opts:["NO relaxes (dilates) blood vessel walls, reducing blood pressure","NO carries oxygen in red blood cells","NO thickens blood to stop bleeding","NO destroys pathogens directly"],
+        exp:"Arg → NO + citrulline (via nitric oxide synthase). NO activates guanylyl cyclase → cGMP → smooth muscle relaxation → vasodilation. Nitroglycerin and Viagra work via this pathway." },
+      { q:"Arginine has a guanidinium group (pKa ~12.5). What does this mean at body pH 7.4?",
+        a:"It is ALWAYS fully positively charged — the most basic standard amino acid",
+        opts:["It is ALWAYS fully positively charged — the most basic standard amino acid","It is neutral at pH 7.4","It becomes negative at pH 7.4","It is only charged at pH < 4"],
+        exp:"pKa 12.5 >> pH 7.4, so the guanidinium is fully protonated (+1) at all physiological conditions. Arg is more basic than Lys (pKa ~10.5) or His (pKa ~6)." },
+      { q:"Arginine is called 'conditionally essential'. What does this mean?",
+        a:"The body can synthesise some Arg, but not enough during growth, illness, or wound healing",
+        opts:["The body can synthesise some Arg, but not enough during growth, illness, or wound healing","The body cannot make any Arg at all","Arg is only needed in childhood","Arg is never needed by adults"],
+        exp:"Arginine is made in the urea cycle in the liver, but at low rates. During stress (growth, trauma, sepsis), demand exceeds supply — it becomes conditionally essential." }
+    ]
+  },
+  { col:18, row:13, aaIdx:19, difficulty:'hard',
+    drawDots: {
+      hint:"Histidine's side chain: a 2-carbon chain (Cα→Cβ) connecting to the imidazole ring — a 5-membered ring with TWO nitrogen atoms. Draw the chain bonds AND all 5 ring bonds!",
+      nodes:[
+        {x:10,  y:70, label:"Cα", color:"#94a3b8"},
+        {x:46,  y:70, label:"Cβ", color:"#94a3b8"},
+        {x:82,  y:70, label:"",   color:"#fb923c"},
+        {x:96,  y:40, label:"N",  color:"#60a5fa"},
+        {x:130, y:28, label:"",   color:"#fb923c"},
+        {x:155, y:46, label:"N",  color:"#60a5fa"},
+        {x:148, y:78, label:"",   color:"#fb923c"},
+      ],
+      bonds:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,2]]
+    },
+    qPool:[
+      { q:"Histidine's imidazole has a pKa of ~6. Why is this unique among amino acid side chains?",
+        a:"Near physiological pH it can act as both acid (donate H⁺) and base (accept H⁺)",
+        opts:["Near physiological pH it can act as both acid (donate H⁺) and base (accept H⁺)","It is always positively charged at pH 7.4","It forms disulfide bonds","It is always negatively charged"],
+        exp:"pKa 6 is close to physiological pH 7.4 — so His can flip between protonated and unprotonated states with small pH changes. Serine proteases use His as a catalytic base." },
+      { q:"Histidine is found at the active site of haemoglobin. What does it do there?",
+        a:"It shuttles protons as O₂ binds and releases (the Bohr effect)",
+        opts:["It shuttles protons as O₂ binds and releases (the Bohr effect)","It binds the iron (Fe) directly","It forms a disulfide bridge","It phosphorylates the protein"],
+        exp:"The 'proximal His' coordinates the haem iron. The 'distal His' stabilises O₂. As CO₂/H⁺ rise in active tissues, His becomes protonated, reducing O₂ affinity — releasing O₂ where needed (Bohr effect)." },
+      { q:"At body pH 7.4, what fraction of Histidine side chains are actually protonated (charged)?",
+        a:"About 4% — it is mostly neutral at pH 7.4 (pKa 6 << pH 7.4)",
+        opts:["About 4% — it is mostly neutral at pH 7.4 (pKa 6 << pH 7.4)","100% protonated","100% deprotonated","Exactly 50% protonated"],
+        exp:"Henderson-Hasselbalch: pH = pKa + log([A⁻]/[HA]). At pH 7.4, [A⁻]/[HA] = 10^(7.4-6) ≈ 25 → ~96% neutral. The tiny charged fraction is catalytically critical." }
+    ]
+  },
+
+  { col:14, row:13, aaIdx:9, difficulty:'hard',
+    drawDots: {
+      hint: "Methionine's side chain: Cα—C—S—C—CH₃. The sulfur (S) sits in the MIDDLE of the chain — draw all 4 bonds!",
+      nodes: [
+        {x:12,  y:70, label:"Cα",  color:"#94a3b8"},
+        {x:62,  y:70, label:"C",   color:"#94a3b8"},
+        {x:117, y:70, label:"S",   color:"#fbbf24"},
+        {x:167, y:70, label:"C",   color:"#94a3b8"},
+        {x:208, y:70, label:"CH₃", color:"#e2e8f0"},
+      ],
+      bonds: [[0,1],[1,2],[2,3],[3,4]]
+    },
+    qPool:[
+      { q:"Methionine is always the first amino acid in a newly built protein. Which codon encodes this?",
+        a:"AUG (the start codon)",
+        opts:["AUG (the start codon)","UAA (a stop codon)","GGG (Glycine codon)","UUU (Phenylalanine codon)"],
+        exp:"The ribosome always begins translation at AUG, which codes for Methionine. Every protein starts with Met (often removed post-translationally)." },
+      { q:"Both Methionine and Cysteine contain sulfur. What distinguishes Methionine's sulfur linkage?",
+        a:"Methionine has a thioether (–S– buried in chain), not a free –SH",
+        opts:["Methionine has a thioether (–S– buried in chain), not a free –SH","Methionine has a free thiol (–SH) like Cysteine","Methionine's sulfur carries a positive charge","Methionine can form disulfide bonds"],
+        exp:"Cysteine: –CH₂–SH (free thiol, forms –S–S–). Methionine: –CH₂–CH₂–S–CH₃ (thioether; S is capped by a methyl group, no free H, cannot form disulfides)." },
+      { q:"After a protein is synthesised, the starting Methionine is often removed. Why does the cell do this?",
+        a:"The mature functional protein does not require Met at its N-terminus",
+        opts:["The mature functional protein does not require Met at its N-terminus","Met is toxic when surface-exposed","Met is replaced by Glycine for flexibility","Met degrades rapidly in air"],
+        exp:"Methionine aminopeptidase (MAP) removes the N-terminal Met if the next residue is small. ~50–70% of human proteins lose their starting Met after synthesis." }
+    ]
+  },
+];
+
+// ================================================================
+//  EXPLORER STATE
+// ================================================================
+const EX = {
+  player:    { col: 9, row: 7, dir: 'down' },
+  chests:    [],   // copy of CHEST_DEFS with added .opened / .collected fields
+  collected: new Set(),
+  nearIdx:   null,
+  qActive:   false,
+  activeChestIdx: null,
+  activeQ:   null,  // currently displayed question (from qPool)
+  answered:  false,
+  correct:   false,
+  keys:      {},
+  animFrame: null,
+  moveTimer: null,
+  gameActive: false,
+};
+
+// ================================================================
+//  START EXPLORER
+// ================================================================
+function startExplorer() {
+  EX.player    = { col: 9, row: 7, dir: 'down' };
+  EX.chests    = CHEST_DEFS.map(d => ({ ...d, opened: false, collected: false }));
+  EX.collected = new Set();
+  EX.nearIdx   = null;
+  EX.qActive   = false;
+  EX.activeChestIdx = null;
+  EX.answered  = false;
+  EX.correct   = false;
+  EX.keys      = {};
+  EX.gameActive = true;
+
+  refreshAllScores();
+  showScreen('screen-explorer');
+  buildCollectionGrid();
+  updateCollectionDisplay();
+
+  // Close any open overlays
+  document.getElementById('interact-hint').style.display    = 'none';
+  document.getElementById('chest-question').style.display   = 'none';
+  document.getElementById('struct-challenge').style.display = 'none';
+  document.getElementById('draw-challenge').style.display   = 'none';
+  document.getElementById('explorer-victory').style.display = 'none';
+
+  // Input listeners
+  window._exKeyDown = e => {
+    EX.keys[e.key] = true;
+    if ((e.key === 'e' || e.key === 'E' || e.key === ' ') && EX.nearIdx !== null && !EX.qActive) {
+      e.preventDefault();
+      openChest(EX.nearIdx);
+    }
+    if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight'].includes(e.key)) e.preventDefault();
+  };
+  window._exKeyUp = e => { EX.keys[e.key] = false; };
+  window.addEventListener('keydown', window._exKeyDown);
+  window.addEventListener('keyup',   window._exKeyUp);
+
+  // Movement polling
+  EX.moveTimer = setInterval(handleExplorerMove, 150);
+
+  // Render loop
+  EX.animFrame = requestAnimationFrame(explorerFrame);
+}
+
+function stopExplorer() {
+  EX.gameActive = false;
+  cancelAnimationFrame(EX.animFrame);
+  clearInterval(EX.moveTimer);
+  if (window._exKeyDown) window.removeEventListener('keydown', window._exKeyDown);
+  if (window._exKeyUp)   window.removeEventListener('keyup',   window._exKeyUp);
+}
+
+// ================================================================
+//  MOVEMENT
+// ================================================================
+function handleExplorerMove() {
+  if (!EX.gameActive || EX.qActive) return;
+  const p = EX.player;
+  let nc = p.col, nr = p.row, dir = p.dir;
+
+  if      (EX.keys['ArrowUp'])    { nr--; dir = 'up'; }
+  else if (EX.keys['ArrowDown'])  { nr++; dir = 'down'; }
+  else if (EX.keys['ArrowLeft'])  { nc--; dir = 'left'; }
+  else if (EX.keys['ArrowRight']) { nc++; dir = 'right'; }
+  else return;
+
+  p.dir = dir;
+
+  // Bounds + wall collision
+  if (nr < 0 || nr >= MAP_ROWS || nc < 0 || nc >= MAP_COLS) return;
+  if (MAP_DATA[nr][nc] === 1) return;
+
+  // Chest collision (treat uncollected chests as walls)
+  if (EX.chests.some(c => c.col === nc && c.row === nr && !c.collected)) return;
+
+  p.col = nc; p.row = nr;
+
+  // Check for nearby chest
+  checkNearChest();
+}
+
+function checkNearChest() {
+  const { col, row } = EX.player;
+  const adj = [{col:col-1,row},{col:col+1,row},{col,row:row-1},{col,row:row+1}];
+  let found = null;
+  for (const pos of adj) {
+    const i = EX.chests.findIndex(c => c.col === pos.col && c.row === pos.row && !c.collected);
+    if (i !== -1) { found = i; break; }
+  }
+  EX.nearIdx = found;
+  const hint = document.getElementById('interact-hint');
+  if (found !== null && !EX.qActive) {
+    const diff = EX.chests[found].difficulty;
+    const diffTag = { easy:'🟢 Easy', medium:'🔵 Medium (+structure)', hard:'🔴 Hard (+drawing)' }[diff] || '';
+    hint.innerHTML = `Press <kbd>E</kbd> or <kbd>Space</kbd> to open &nbsp;·&nbsp; <span style="font-weight:700">${diffTag}</span>`;
+    hint.style.display = 'block';
+  } else {
+    hint.style.display = 'none';
+  }
+}
+
+// ================================================================
+//  CHEST INTERACTION
+// ================================================================
+function openChest(idx) {
+  if (EX.qActive) return;
+  EX.qActive = true;
+  EX.activeChestIdx = idx;
+  EX.answered = false;
+  EX.correct  = false;
+  EX.chests[idx].opened = true;
+  document.getElementById('interact-hint').style.display = 'none';
+
+  const chest = EX.chests[idx];
+  const aa    = AMINO_ACIDS[chest.aaIdx];
+
+  // Pick a random question from the pool
+  const q = chest.qPool[Math.floor(Math.random() * chest.qPool.length)];
+  EX.activeQ = q;
+
+  const diffTag = { easy:'🟢 Easy', medium:'🔵 Medium', hard:'🔴 Hard' }[chest.difficulty] || '';
+  document.getElementById('cq-label').textContent = `🎁 ${aa.name} (${aa.abbr3}) · ${diffTag}`;
+  document.getElementById('cq-text').textContent  = q.q;
+  document.getElementById('cq-feedback').style.display   = 'none';
+  document.getElementById('cq-collect-btn').style.display = 'none';
+  // Reset collect button to default for easy chests
+  const collectBtn = document.getElementById('cq-collect-btn');
+  collectBtn.textContent = '✓ Add to Collection';
+  collectBtn.onclick = collectAminoAcid;
+
+  const optsEl = document.getElementById('cq-options');
+  optsEl.innerHTML = '';
+  shuffle([...q.opts]).forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'cq-opt';
+    btn.textContent = opt;
+    btn.onclick = () => answerChestQ(opt);
+    optsEl.appendChild(btn);
+  });
+
+  document.getElementById('chest-question').style.display = 'flex';
+}
+
+function answerChestQ(selected) {
+  if (EX.answered) return;
+  EX.answered = true;
+  const chest = EX.chests[EX.activeChestIdx];
+  const q     = EX.activeQ;
+  const correct = selected.trim() === q.a.trim();
+  EX.correct = correct;
+
+  document.querySelectorAll('.cq-opt').forEach(btn => {
+    btn.disabled = true;
+    if (btn.textContent.trim() === q.a.trim()) btn.classList.add('correct');
+    else if (btn.textContent.trim() === selected.trim() && !correct) btn.classList.add('wrong');
+  });
+
+  const fb = document.getElementById('cq-feedback');
+  fb.style.display = 'block';
+  if (correct) {
+    addPoints('player', 15);
+    const collectBtn = document.getElementById('cq-collect-btn');
+    if (chest.difficulty === 'medium') {
+      const nextHint = '+15 pts · Now identify the correct structure for a bonus!';
+      fb.style.background = 'rgba(34,197,94,0.1)';
+      fb.style.border     = '1px solid rgba(34,197,94,0.3)';
+      fb.innerHTML = `<strong style="color:var(--success)">${nextHint}</strong><br><br>${q.exp}`;
+      collectBtn.textContent = '→ Structure Challenge (+10 bonus)';
+      collectBtn.onclick = () => {
+        document.getElementById('chest-question').style.display = 'none';
+        showStructChallenge();
+      };
+    } else if (chest.difficulty === 'hard') {
+      const nextHint = '+15 pts · Now draw the side chain for a bonus!';
+      fb.style.background = 'rgba(34,197,94,0.1)';
+      fb.style.border     = '1px solid rgba(34,197,94,0.3)';
+      fb.innerHTML = `<strong style="color:var(--success)">${nextHint}</strong><br><br>${q.exp}`;
+      collectBtn.textContent = '→ Drawing Challenge (+20 bonus)';
+      collectBtn.onclick = () => {
+        document.getElementById('chest-question').style.display = 'none';
+        showDrawChallenge();
+      };
+    } else {
+      fb.style.background = 'rgba(34,197,94,0.1)';
+      fb.style.border     = '1px solid rgba(34,197,94,0.3)';
+      fb.innerHTML = `<strong style="color:var(--success)">Correct! +15 pts</strong><br><br>${q.exp}`;
+      collectBtn.textContent = '✓ Add to Collection';
+      collectBtn.onclick = collectAminoAcid;
+    }
+    collectBtn.style.display = 'block';
+  } else {
+    fb.style.background = 'rgba(239,68,68,0.1)';
+    fb.style.border     = '1px solid rgba(239,68,68,0.3)';
+    fb.innerHTML = `<strong style="color:var(--danger)">Incorrect.</strong> The answer is: <strong>${q.a}</strong><br><br>${q.exp}<br><br><em>Walk back to this chest to try again with a different question!</em>`;
+    chest.opened = false; // allow retry with a fresh random question
+  }
+}
+
+// Internal helper — called by all collect buttons
+function _doCollect() {
+  const idx = EX.activeChestIdx;
+  if (idx === null) return;
+  EX.chests[idx].collected = true;
+  EX.collected.add(EX.chests[idx].aaIdx);
+  const name = AMINO_ACIDS[EX.chests[idx].aaIdx].name;
+  EX.qActive = false;
+  EX.activeChestIdx = null;
+  updateCollectionDisplay();
+  toast(`${name} added to collection!`, 'success');
+  if (EX.collected.size === CHEST_DEFS.length) {
+    setTimeout(() => { document.getElementById('explorer-victory').style.display = 'flex'; }, 600);
+  }
+  checkNearChest();
+}
+function collectAminoAcid()      { document.getElementById('chest-question').style.display   = 'none'; _doCollect(); }
+function collectAfterStructure() { document.getElementById('struct-challenge').style.display = 'none'; _doCollect(); }
+function collectAfterDraw()      { document.getElementById('draw-challenge').style.display   = 'none'; _doCollect(); }
+
+function closeChestQuestion() {
+  EX.qActive = false;
+  EX.activeChestIdx = null;
+  document.getElementById('chest-question').style.display   = 'none';
+  document.getElementById('struct-challenge').style.display = 'none';
+  document.getElementById('draw-challenge').style.display   = 'none';
+  checkNearChest();
+}
+
+// ================================================================
+//  COLLECTION PANEL
+// ================================================================
+function buildCollectionGrid() {
+  const el = document.getElementById('coll-grid');
+  el.innerHTML = AMINO_ACIDS.map((aa, i) => {
+    const icons = { nonpolar:'\uD83D\uDFE0', polar:'\uD83D\uDFE2', positive:'\uD83D\uDD35', negative:'\uD83D\uDD34' };
+    return `<div class="coll-slot locked" id="coll-slot-${i}">
+      <div class="coll-slot-icon">${icons[aa.category] || '\u26AA'}</div>
+      <div>
+        <div class="coll-slot-name" id="coll-name-${i}">???</div>
+        <div class="coll-slot-cat"  id="coll-cat-${i}"  style="color:var(--muted)">Undiscovered</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateCollectionDisplay() {
+  document.getElementById('coll-count').textContent = `${EX.collected.size} / ${CHEST_DEFS.length}`;
+  EX.collected.forEach(aaIdx => {
+    const aa   = AMINO_ACIDS[aaIdx];
+    const slot = document.getElementById(`coll-slot-${aaIdx}`);
+    if (!slot || slot.classList.contains('unlocked')) return;
+    slot.classList.remove('locked');
+    slot.classList.add('unlocked', 'pop');
+    document.getElementById(`coll-name-${aaIdx}`).textContent = `${aa.name} (${aa.abbr1})`;
+    const catColours = { nonpolar:'var(--nonpolar)', polar:'var(--polar)', positive:'var(--positive)', negative:'var(--negative)' };
+    document.getElementById(`coll-cat-${aaIdx}`).textContent  = catLabel(aa.category);
+    document.getElementById(`coll-cat-${aaIdx}`).style.color  = catColours[aa.category] || 'var(--muted)';
+    setTimeout(() => slot.classList.remove('pop'), 500);
+  });
+}
+
+// ================================================================
+//  CANVAS RENDERING
+// ================================================================
+function explorerFrame() {
+  if (!EX.gameActive) return;
+  drawExplorer();
+  EX.animFrame = requestAnimationFrame(explorerFrame);
+}
+
+function drawExplorer() {
+  const canvas = document.getElementById('explorer-canvas');
+  const ctx    = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Draw tiles
+  for (let r = 0; r < MAP_ROWS; r++) {
+    for (let c = 0; c < MAP_COLS; c++) {
+      drawExTile(ctx, c, r, MAP_DATA[r][c]);
+    }
+  }
+
+  // Draw chests
+  EX.chests.forEach((ch, i) => drawExChest(ctx, ch, i === EX.nearIdx));
+
+  // Draw player
+  drawExPlayer(ctx);
+
+  // Draw mini HUD (collected count)
+  ctx.fillStyle = 'rgba(15,23,42,0.75)';
+  ctx.fillRect(4, 4, 120, 24);
+  ctx.fillStyle = '#f1f5f9';
+  ctx.font = 'bold 12px "Segoe UI", system-ui, sans-serif';
+  ctx.fillText(`\uD83E\uDDEA ${EX.collected.size}/${CHEST_DEFS.length} collected`, 10, 20);
+}
+
+function drawExTile(ctx, c, r, type) {
+  const x = c * TILE, y = r * TILE;
+  if (type === 1) {
+    // Wall: dark with 3D shading
+    ctx.fillStyle = '#1a2744';
+    ctx.fillRect(x, y, TILE, TILE);
+    ctx.fillStyle = '#253660';
+    ctx.fillRect(x, y, TILE, 5);
+    ctx.fillRect(x, y, 5, TILE);
+    ctx.fillStyle = '#0d1520';
+    ctx.fillRect(x, y + TILE - 4, TILE, 4);
+    ctx.fillRect(x + TILE - 4, y, 4, TILE);
+    // Subtle brick pattern
+    ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+  } else {
+    // Floor: dark blue with grid
+    ctx.fillStyle = '#0c1829';
+    ctx.fillRect(x, y, TILE, TILE);
+    ctx.strokeStyle = 'rgba(99,102,241,0.08)';
+    ctx.lineWidth = 0.5;
+    ctx.strokeRect(x + 0.5, y + 0.5, TILE - 1, TILE - 1);
+  }
+}
+
+function drawExChest(ctx, ch, isNear) {
+  const x = ch.col * TILE, y = ch.row * TILE;
+  const pad = 4, s = TILE - pad * 2;
+
+  if (ch.collected) {
+    // Collected: dark open chest
+    ctx.fillStyle = '#1e293b';
+    ctx.fillRect(x + pad, y + pad + s * 0.4, s, s * 0.6);
+    ctx.fillStyle = '#334155';
+    ctx.fillRect(x + pad, y + pad, s, s * 0.4);
+    // Open lid (tilted)
+    ctx.save();
+    ctx.translate(x + pad + s / 2, y + pad);
+    ctx.rotate(-0.4);
+    ctx.fillStyle = '#374155';
+    ctx.fillRect(-s / 2, -s * 0.1, s, s * 0.35);
+    ctx.restore();
+    return;
+  }
+
+  // Colour palette by difficulty
+  const DC = {
+    easy:   { body:'#92400e', bodyH:'#b45309', lid:'#b45309', lidH:'#d97706', lock:'#fbbf24', glow:'#f59e0b', badge:'E' },
+    medium: { body:'#1e3a8a', bodyH:'#1d4ed8', lid:'#1d4ed8', lidH:'#3b82f6', lock:'#93c5fd', glow:'#60a5fa', badge:'M' },
+    hard:   { body:'#581c87', bodyH:'#7e22ce', lid:'#7e22ce', lidH:'#a855f7', lock:'#e879f9', glow:'#c026d3', badge:'H' },
+  }[ch.difficulty] || { body:'#92400e', bodyH:'#b45309', lid:'#b45309', lidH:'#d97706', lock:'#fbbf24', glow:'#f59e0b', badge:'?' };
+
+  const bodyColor = isNear ? DC.bodyH : DC.body;
+  const lidColor  = isNear ? DC.lidH  : DC.lid;
+
+  // Body
+  ctx.fillStyle = bodyColor;
+  ctx.fillRect(x + pad, y + pad + s * 0.38, s, s * 0.62);
+  ctx.fillStyle = 'rgba(255,255,255,0.1)';
+  ctx.fillRect(x + pad, y + pad + s * 0.38, s, 3);
+
+  // Lid
+  ctx.fillStyle = lidColor;
+  ctx.fillRect(x + pad, y + pad, s, s * 0.42);
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.fillRect(x + pad, y + pad, s, 3);
+
+  // Lock
+  ctx.fillStyle = DC.lock;
+  ctx.beginPath();
+  ctx.arc(x + pad + s / 2, y + pad + s * 0.56, 4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Difficulty badge (small letter below chest)
+  ctx.fillStyle  = isNear ? '#fff' : 'rgba(255,255,255,0.55)';
+  ctx.font       = 'bold 8px "Segoe UI", sans-serif';
+  ctx.textAlign  = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.fillText(DC.badge, x + TILE / 2, y + TILE - 1);
+  ctx.textBaseline = 'alphabetic';
+
+  // Near glow
+  if (isNear) {
+    ctx.shadowColor = DC.glow;
+    ctx.shadowBlur  = 14;
+    ctx.strokeStyle = DC.glow;
+    ctx.lineWidth   = 2;
+    ctx.strokeRect(x + pad, y + pad, s, s);
+    ctx.shadowBlur  = 0;
+    ctx.lineWidth   = 1;
+  }
+}
+
+// ================================================================
+//  STRUCTURE CHALLENGE (medium chests)
+// ================================================================
+function showStructChallenge() {
+  const chest = EX.chests[EX.activeChestIdx];
+  const correct = AMINO_ACIDS[chest.aaIdx];
+
+  // Build pool of 3 distractors from other amino acids
+  const others = AMINO_ACIDS.filter(aa => aa.name !== correct.name);
+  shuffle(others);
+  const pool = [correct, ...others.slice(0, 3)];
+  shuffle(pool);
+
+  document.getElementById('sc-aa-name').textContent = correct.name;
+  document.getElementById('sc-feedback').style.display = 'none';
+  document.getElementById('sc-collect-btn').style.display = 'none';
+
+  const optsEl = document.getElementById('sc-options');
+  optsEl.innerHTML = '';
+  pool.forEach(aa => {
+    const div = document.createElement('div');
+    div.className = 'sc-opt';
+    div.innerHTML = `<div class="sc-opt-name">${aa.name}</div>${SVG_STRUCTURES[aa.name] || '<div style="color:var(--muted);font-size:0.8rem;padding:1rem">No structure</div>'}`;
+    div.onclick = () => answerStructChallenge(aa.name, correct.name);
+    optsEl.appendChild(div);
+  });
+
+  document.getElementById('struct-challenge').style.display = 'flex';
+}
+
+function answerStructChallenge(selected, correct) {
+  const isCorrect = selected === correct;
+  document.querySelectorAll('.sc-opt').forEach(el => {
+    el.style.pointerEvents = 'none';
+    const lbl = el.querySelector('.sc-opt-name');
+    if (lbl && lbl.textContent === correct) el.classList.add('sc-correct');
+    else if (lbl && lbl.textContent === selected && !isCorrect) el.classList.add('sc-wrong');
+  });
+  const fb = document.getElementById('sc-feedback');
+  fb.style.display = 'block';
+  if (isCorrect) {
+    addPoints('player', 10);
+    fb.style.background = 'rgba(34,197,94,0.1)';
+    fb.style.border     = '1px solid rgba(34,197,94,0.3)';
+    fb.innerHTML = `<strong style="color:var(--success)">Correct! +10 bonus pts</strong> — You identified the right structure.`;
+    document.getElementById('sc-collect-btn').style.display = 'block';
+  } else {
+    fb.style.background = 'rgba(239,68,68,0.1)';
+    fb.style.border     = '1px solid rgba(239,68,68,0.3)';
+    fb.innerHTML = `<strong style="color:var(--danger)">Incorrect.</strong> The highlighted option is <strong>${correct}</strong>.<br>Collect anyway using the skip button below.`;
+    document.getElementById('sc-collect-btn').style.display = 'block';
+  }
+}
+
+function closeStructChallenge() {
+  document.getElementById('struct-challenge').style.display = 'none';
+  collectAfterStructure();
+}
+
+// ================================================================
+//  DRAW CHALLENGE (hard chests)
+// ================================================================
+const drawState = {
+  nodes: [],          // {x, y, label, color}
+  bonds: [],          // required [[i,j], ...]
+  drawnBonds: [],     // [[i,j], ...]  (always i<j for dedup)
+  selectedNode: null, // index or null
+  submitted: false,
+};
+
+function showDrawChallenge() {
+  const chest = EX.chests[EX.activeChestIdx];
+  const dd    = chest.drawDots;
+
+  drawState.nodes        = dd.nodes.map(n => ({ ...n }));
+  drawState.bonds        = dd.bonds;
+  drawState.drawnBonds   = [];
+  drawState.selectedNode = null;
+  drawState.submitted    = false;
+
+  document.getElementById('dc-hint').textContent = dd.hint;
+  document.getElementById('dc-feedback').style.display = 'none';
+  document.getElementById('dc-collect-btn').style.display = 'none';
+
+  const canvas = document.getElementById('draw-canvas');
+  canvas.style.pointerEvents = 'auto';
+  canvas.onclick = handleDrawClick;
+
+  renderDrawCanvas();
+  document.getElementById('draw-challenge').style.display = 'flex';
+}
+
+function handleDrawClick(e) {
+  if (drawState.submitted) return;
+  const canvas = document.getElementById('draw-canvas');
+  const rect   = canvas.getBoundingClientRect();
+  // scale click coords to canvas internal resolution
+  const scaleX = canvas.width  / rect.width;
+  const scaleY = canvas.height / rect.height;
+  const mx = (e.clientX - rect.left) * scaleX;
+  const my = (e.clientY - rect.top)  * scaleY;
+
+  // Find closest node within 18px
+  let hit = null;
+  let best = Infinity;
+  drawState.nodes.forEach((n, i) => {
+    const d = Math.hypot(n.x - mx, n.y - my);
+    if (d < 18 && d < best) { best = d; hit = i; }
+  });
+
+  if (hit === null) {
+    drawState.selectedNode = null;
+    renderDrawCanvas();
+    return;
+  }
+
+  if (drawState.selectedNode === null) {
+    drawState.selectedNode = hit;
+  } else if (drawState.selectedNode === hit) {
+    drawState.selectedNode = null;
+  } else {
+    // Draw bond between selectedNode and hit
+    const a = Math.min(drawState.selectedNode, hit);
+    const b = Math.max(drawState.selectedNode, hit);
+    const already = drawState.drawnBonds.some(([x, y]) => x === a && y === b);
+    if (!already) drawState.drawnBonds.push([a, b]);
+    drawState.selectedNode = null;
+  }
+  renderDrawCanvas();
+}
+
+function renderDrawCanvas() {
+  const canvas = document.getElementById('draw-canvas');
+  const ctx    = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  const { nodes, bonds, drawnBonds, selectedNode, submitted } = drawState;
+
+  // Required bonds as ghost lines
+  bonds.forEach(([i, j]) => {
+    const a = nodes[i], b = nodes[j];
+    const drawn = drawnBonds.some(([x, y]) => x === Math.min(i,j) && y === Math.max(i,j));
+    if (!drawn) {
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = 'rgba(148,163,184,0.2)';
+      ctx.lineWidth   = 1.5;
+      ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  });
+
+  // Drawn bonds
+  drawnBonds.forEach(([i, j]) => {
+    const a = nodes[i], b = nodes[j];
+    const required = bonds.some(([x, y]) => Math.min(x,y) === Math.min(i,j) && Math.max(x,y) === Math.max(i,j));
+    if (submitted) {
+      ctx.strokeStyle = required ? '#4ade80' : '#f87171';
+    } else {
+      ctx.strokeStyle = '#818cf8';
+    }
+    ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+    ctx.lineWidth = 1;
+  });
+
+  // Nodes
+  nodes.forEach((n, i) => {
+    const isSelected = i === selectedNode;
+    ctx.beginPath();
+    ctx.arc(n.x, n.y, isSelected ? 9 : 7, 0, Math.PI * 2);
+    ctx.fillStyle = isSelected ? '#f0abfc' : (n.color || '#94a3b8');
+    ctx.fill();
+    if (isSelected) {
+      ctx.shadowColor = '#e879f9';
+      ctx.shadowBlur  = 10;
+      ctx.strokeStyle = '#e879f9';
+      ctx.lineWidth   = 2;
+      ctx.stroke();
+      ctx.shadowBlur  = 0;
+      ctx.lineWidth   = 1;
+    }
+    if (n.label) {
+      ctx.fillStyle    = '#f1f5f9';
+      ctx.font         = 'bold 9px "Segoe UI", sans-serif';
+      ctx.textAlign    = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(n.label, n.x, n.y - 14);
+      ctx.textBaseline = 'alphabetic';
+    }
+  });
+}
+
+function submitDrawing() {
+  if (drawState.submitted) return;
+  drawState.submitted = true;
+  document.getElementById('draw-canvas').style.pointerEvents = 'none';
+
+  const { bonds, drawnBonds } = drawState;
+  // Count correctly drawn required bonds
+  let correct = 0;
+  bonds.forEach(([i, j]) => {
+    const a = Math.min(i, j), b = Math.max(i, j);
+    if (drawnBonds.some(([x, y]) => x === a && y === b)) correct++;
+  });
+  const pct   = bonds.length > 0 ? correct / bonds.length : 0;
+  const pass  = pct >= 0.75;
+
+  renderDrawCanvas(); // re-render with colour feedback
+
+  const fb = document.getElementById('dc-feedback');
+  fb.style.display = 'block';
+  if (pass) {
+    addPoints('player', 20);
+    fb.style.background = 'rgba(34,197,94,0.1)';
+    fb.style.border     = '1px solid rgba(34,197,94,0.3)';
+    fb.innerHTML = `<strong style="color:var(--success)">Great job! +20 bonus pts</strong> — ${correct}/${bonds.length} bonds correct (${Math.round(pct*100)}%).`;
+    document.getElementById('dc-collect-btn').style.display = 'block';
+  } else {
+    fb.style.background = 'rgba(239,68,68,0.1)';
+    fb.style.border     = '1px solid rgba(239,68,68,0.3)';
+    fb.innerHTML = `<strong style="color:var(--danger)">Keep practising!</strong> ${correct}/${bonds.length} bonds correct (${Math.round(pct*100)}%). You need ≥75% to earn the bonus.<br>You can still collect using the skip button.`;
+    document.getElementById('dc-collect-btn').style.display = 'block';
+  }
+}
+
+function undoLastBond() {
+  if (drawState.submitted) return;
+  drawState.drawnBonds.pop();
+  drawState.selectedNode = null;
+  renderDrawCanvas();
+}
+
+function clearDrawing() {
+  if (drawState.submitted) return;
+  drawState.drawnBonds   = [];
+  drawState.selectedNode = null;
+  renderDrawCanvas();
+}
+
+function closeDrawChallenge() {
+  document.getElementById('draw-challenge').style.display = 'none';
+  collectAfterDraw();
+}
+
+// ================================================================
+
+function drawExPlayer(ctx) {
+  const { col, row, dir } = EX.player;
+  const cx = col * TILE + TILE / 2;
+  const cy = row * TILE + TILE / 2;
+  const r  = TILE * 0.38;
+
+  // Body
+  ctx.fillStyle = '#6366f1';
+  ctx.beginPath();
+  ctx.arc(cx, cy, r, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Outline
+  ctx.strokeStyle = '#818cf8';
+  ctx.lineWidth   = 2;
+  ctx.stroke();
+  ctx.lineWidth   = 1;
+
+  // Eyes (direction-based)
+  const eyeOffsets = {
+    up:    [[-4,-4],[4,-4]],
+    down:  [[-4, 4],[4, 4]],
+    left:  [[-5,-3],[-5,3]],
+    right: [[ 5,-3],[ 5,3]],
+  }[dir] || [[-4,-4],[4,-4]];
+
+  ctx.fillStyle = 'white';
+  eyeOffsets.forEach(([ex, ey]) => {
+    ctx.beginPath();
+    ctx.arc(cx + ex, cy + ey, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+  });
+
+  // Pupil
+  const pupilOff = { up:[0,-1.5], down:[0,1.5], left:[-1.5,0], right:[1.5,0] }[dir] || [0,0];
+  ctx.fillStyle = '#1e293b';
+  eyeOffsets.forEach(([ex, ey]) => {
+    ctx.beginPath();
+    ctx.arc(cx + ex + pupilOff[0], cy + ey + pupilOff[1], 1.2, 0, Math.PI * 2);
+    ctx.fill();
+  });
+}
+
+</script>
+</body>
+</html>
