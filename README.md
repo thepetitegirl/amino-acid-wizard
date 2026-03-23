@@ -1,6 +1,6 @@
-# Amino Acid Wizard
+# Amino Acid Wizard (WIP)
 
-An interactive browser-based game for learning all 20 standard amino acids.
+An interactive browser-based game for learning all 20 standard amino acids. This is a mini-project (WIP; work in progress) to explore the use of games for educational purposes.
 
 ## How to play
 
