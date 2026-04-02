@@ -770,7 +770,7 @@
         <span>Sulfur (S)</span>
       </span>
       <div style="flex-basis:100%; margin-top:0.4rem; font-size:0.75rem; color:#94a3b8;">
-        <strong>Note:</strong> Only the <strong>side chain</strong> of each amino acid is shown. The backbone (NH₂–Cα–COOH) is omitted. Hydrogens are sometimes not shown for clarity.
+        <strong>Note:</strong> Only the <strong>side chain</strong> of each amino acid is shown. The backbone (NH₃⁺–Cα–COO⁻) is omitted. Hydrogens are sometimes not shown for clarity. All structures are shown at pH 7.
       </div>
     </div>
 
@@ -1019,7 +1019,7 @@ const AMINO_ACIDS = [
     hint: "Lysine deficiency is common in plant-based diets. Important for growth and repair."
   },
   {
-    name: "Aspartic Acid",
+    name: "Aspartate",
     abbr3: "Asp", abbr1: "D", category: "negative",
     property: "Negatively charged at body pH; one of the two amino acids in sweetener aspartame",
     hint: "As 'aspartate', it is a key intermediate in the urea cycle — how the body removes ammonia."
@@ -1087,11 +1087,11 @@ const AMINO_ACIDS = [
   {
     name: "Glutamine",
     abbr3: "Gln", abbr1: "Q", category: "polar",
-    property: "Amide of Glutamic Acid; one carbon longer than Asparagine; most abundant free amino acid in blood",
+    property: "Amide of Glutamate; one carbon longer than Asparagine; most abundant free amino acid in blood",
     hint: "Glutamine is the main fuel for rapidly dividing cells — immune cells and gut epithelium are 'glutamine-addicted'."
   },
   {
-    name: "Glutamic Acid",
+    name: "Glutamate",
     abbr3: "Glu", abbr1: "E", category: "negative",
     property: "Negatively charged at body pH; the brain's primary excitatory neurotransmitter (glutamate)",
     hint: "MSG (monosodium glutamate) is the sodium salt of Glutamic Acid — it gives the 'umami' (savoury) taste."
@@ -1171,8 +1171,8 @@ const SVG_STRUCTURES = {
     <text x="55" y="75" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–(CH₂)₄–NH₃⁺</text>
   </svg>`,
 
-  // Aspartic Acid — C–C(=O)–O
-  "Aspartic Acid": `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+  // Aspartate — C–C(=O)–O
+  "Aspartate": `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
     <line x1="32" y1="50" x2="48" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="52" y1="43" x2="52" y2="30" stroke="#94a3b8" stroke-width="2"/>
     <line x1="58" y1="43" x2="58" y2="30" stroke="#94a3b8" stroke-width="2"/>
@@ -1354,8 +1354,8 @@ const SVG_STRUCTURES = {
     <text x="55" y="96" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–(CH₂)₂–CONH₂</text>
   </svg>`,
 
-  // Glutamic Acid — C–C–C(=O)–O
-  "Glutamic Acid": `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+  // Glutamate — C–C–C(=O)–O
+  "Glutamate": `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
     <line x1="22" y1="50" x2="35" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="49" y1="50" x2="63" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="67" y1="43" x2="67" y2="30" stroke="#94a3b8" stroke-width="2"/>
