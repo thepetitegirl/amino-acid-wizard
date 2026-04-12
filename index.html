@@ -617,6 +617,77 @@
       .explorer-wrap { flex-direction: column; }
       .collection-sidebar { max-width: 100%; max-height: 200px; }
     }
+
+    /* ================================================================
+       REFERENCE TAB
+       ================================================================ */
+    .ref-screen-header {
+      background: var(--surface); border-bottom: 1px solid var(--border);
+      padding: 0.875rem 1.5rem; display: flex; align-items: center;
+      justify-content: space-between; gap: 1rem;
+    }
+    .ref-filter-bar {
+      display: flex; gap: 0.5rem; flex-wrap: wrap; padding: 1rem 0 0.5rem;
+    }
+    .ref-filter-btn {
+      padding: 0.3rem 0.85rem; border-radius: 999px; font-size: 0.78rem;
+      font-weight: 700; border: 2px solid var(--border); background: var(--surface);
+      color: var(--muted); cursor: pointer; transition: all 0.18s;
+    }
+    .ref-filter-btn:hover   { border-color: var(--primary); color: var(--text); }
+    .ref-filter-btn.active  { background: var(--primary); border-color: var(--primary); color: #fff; }
+    .ref-filter-btn.f-nonpolar.active  { background: var(--nonpolar); border-color: var(--nonpolar); }
+    .ref-filter-btn.f-polar.active     { background: var(--polar);    border-color: var(--polar); }
+    .ref-filter-btn.f-positive.active  { background: var(--positive); border-color: var(--positive); }
+    .ref-filter-btn.f-negative.active  { background: var(--negative); border-color: var(--negative); }
+    .ref-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 1rem; padding-bottom: 2rem;
+    }
+    .ref-card {
+      background: var(--surface); border: 2px solid var(--border);
+      border-radius: 0.875rem; padding: 0.75rem; cursor: pointer;
+      transition: all 0.18s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      display: flex; flex-direction: column; align-items: center;
+    }
+    .ref-card:hover { transform: translateY(-2px); border-color: var(--primary); box-shadow: 0 6px 20px rgba(99,102,241,0.2); }
+    .ref-card.hidden { display: none; }
+    .ref-svg-wrap { width: 100%; height: 90px; display: flex; align-items: center; justify-content: center; }
+    .ref-svg-wrap svg { width: 100%; height: 100%; }
+    .ref-name { font-size: 0.9rem; font-weight: 700; text-align: center; margin-top: 0.4rem; }
+    .ref-abbr { font-size: 0.72rem; color: var(--muted); margin-top: 0.1rem; }
+    .ref-cat  { font-size: 0.62rem; font-weight: 700; text-transform: uppercase;
+                letter-spacing: 0.07em; padding: 0.15rem 0.5rem; border-radius: 999px; margin-top: 0.35rem; }
+
+    /* Modal overlay */
+    .ref-modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      z-index: 3000; align-items: center; justify-content: center;
+    }
+    .ref-modal-overlay.open { display: flex; }
+    .ref-modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 1.25rem; padding: 2rem; max-width: 480px; width: 90%;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.5); position: relative;
+    }
+    .ref-modal-close {
+      position: absolute; top: 1rem; right: 1rem;
+      background: var(--card); border: 1px solid var(--border);
+      border-radius: 50%; width: 32px; height: 32px; font-size: 1.1rem;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      color: var(--muted);
+    }
+    .ref-modal-close:hover { color: var(--text); background: var(--border); }
+    .ref-modal-svg { width: 100%; height: 140px; display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
+    .ref-modal-svg svg { width: 100%; height: 100%; }
+    .ref-modal-name { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.25rem; }
+    .ref-modal-codes { font-size: 0.85rem; color: var(--muted); margin-bottom: 0.75rem; }
+    .ref-modal-prop { font-size: 0.875rem; line-height: 1.6; color: var(--text); margin-bottom: 0.75rem; }
+    .ref-modal-hint { font-size: 0.8rem; color: var(--muted); font-style: italic; line-height: 1.5;
+                      background: var(--card); border-radius: 0.5rem; padding: 0.6rem 0.8rem; }
   </style>
 </head>
 <body>
@@ -672,7 +743,10 @@
         <div class="score-val" id="gs-bscore">0</div>
       </div>
     </div>
-    <button class="btn btn-secondary" onclick="goHome()">← Home</button>
+    <div style="display:flex;gap:0.5rem;">
+      <button class="btn btn-secondary" style="font-size:0.85rem;" onclick="showReference()">🔬 Reference</button>
+      <button class="btn btn-secondary" onclick="goHome()">← Home</button>
+    </div>
   </div>
 
   <div class="container">
@@ -3458,6 +3532,97 @@ function drawExPlayer(ctx) {
   });
 }
 
+
+// ================================================================
+//  REFERENCE TAB
+// ================================================================
+function showReference() {
+  showScreen('screen-reference');
+  buildReferenceGrid('all');
+}
+
+function buildReferenceGrid(filter) {
+  const grid = document.getElementById('ref-grid');
+  grid.innerHTML = '';
+  AMINO_ACIDS.forEach(aa => {
+    if (filter !== 'all' && aa.category !== filter) return;
+    const svg = SVG_STRUCTURES[aa.name] || '';
+    const catColors = {
+      nonpolar: { bg: 'rgba(251,146,60,0.12)', border: 'rgba(251,146,60,0.4)', text: 'var(--nonpolar)' },
+      polar:    { bg: 'rgba(52,211,153,0.12)', border: 'rgba(52,211,153,0.4)', text: 'var(--polar)' },
+      positive: { bg: 'rgba(96,165,250,0.12)', border: 'rgba(96,165,250,0.4)', text: 'var(--positive)' },
+      negative: { bg: 'rgba(248,113,113,0.12)', border: 'rgba(248,113,113,0.4)', text: 'var(--negative)' },
+    };
+    const c = catColors[aa.category] || catColors.nonpolar;
+    const card = document.createElement('div');
+    card.className = 'ref-card';
+    card.dataset.name = aa.name;
+    card.innerHTML = `
+      <div class="ref-svg-wrap">${svg}</div>
+      <div class="ref-name">${aa.name}</div>
+      <div class="ref-abbr">${aa.abbr3} &nbsp;·&nbsp; ${aa.abbr1}</div>
+      <div class="ref-cat cat-tag-${aa.category}">${aa.category}</div>`;
+    card.addEventListener('click', () => openRefModal(aa));
+    grid.appendChild(card);
+  });
+}
+
+function openRefModal(aa) {
+  const svg = SVG_STRUCTURES[aa.name] || '';
+  document.getElementById('ref-modal-svg').innerHTML = svg;
+  document.getElementById('ref-modal-name').textContent = aa.name;
+  document.getElementById('ref-modal-codes').textContent =
+    `${aa.abbr3} (3-letter) · ${aa.abbr1} (1-letter) · ${aa.category.charAt(0).toUpperCase() + aa.category.slice(1)}`;
+  document.getElementById('ref-modal-prop').textContent = aa.property;
+  document.getElementById('ref-modal-hint').textContent = aa.hint;
+  document.getElementById('ref-modal-overlay').classList.add('open');
+}
+
+function closeRefModal() {
+  document.getElementById('ref-modal-overlay').classList.remove('open');
+}
+
+function setRefFilter(btn, filter) {
+  document.querySelectorAll('.ref-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildReferenceGrid(filter);
+}
 </script>
+
+<!-- ================================================================
+     SCREEN 6 — AMINO ACID REFERENCE
+     ================================================================ -->
+<div id="screen-reference" class="screen">
+  <div class="ref-screen-header">
+    <div>
+      <div style="font-weight:700;">🔬 Amino Acid Reference</div>
+      <div class="muted" style="font-size:0.75rem;">All 20 standard amino acids</div>
+    </div>
+    <button class="btn btn-secondary" onclick="exitToMenu()">← Menu</button>
+  </div>
+  <div class="container">
+    <div class="ref-filter-bar">
+      <button class="ref-filter-btn active" onclick="setRefFilter(this,'all')">All 20</button>
+      <button class="ref-filter-btn f-nonpolar" onclick="setRefFilter(this,'nonpolar')">Nonpolar</button>
+      <button class="ref-filter-btn f-polar" onclick="setRefFilter(this,'polar')">Polar</button>
+      <button class="ref-filter-btn f-positive" onclick="setRefFilter(this,'positive')">Positive</button>
+      <button class="ref-filter-btn f-negative" onclick="setRefFilter(this,'negative')">Negative</button>
+    </div>
+    <div class="ref-grid" id="ref-grid"></div>
+  </div>
+</div>
+
+<!-- Amino acid detail modal -->
+<div id="ref-modal-overlay" class="ref-modal-overlay" onclick="if(event.target===this)closeRefModal()">
+  <div class="ref-modal">
+    <button class="ref-modal-close" onclick="closeRefModal()">✕</button>
+    <div class="ref-modal-svg" id="ref-modal-svg"></div>
+    <div class="ref-modal-name" id="ref-modal-name"></div>
+    <div class="ref-modal-codes" id="ref-modal-codes"></div>
+    <div class="ref-modal-prop" id="ref-modal-prop"></div>
+    <div class="ref-modal-hint" id="ref-modal-hint"></div>
+  </div>
+</div>
+
 </body>
 </html>
