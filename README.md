@@ -20,9 +20,15 @@ Open `index.html` in any browser — no installation or setup needed.
 Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartate, Lysine, Methionine, Valine, Leucine, Isoleucine, Threonine, Tyrosine, Asparagine, Glutamine, Glutamate, Arginine, Histidine
 
 ## Last updated
+2026-04-12 — Additional work to be done:
+- Rechecking on amino acid structures
+- Revamping structure of websites
 
-2026-04-12 — UI and naming updates:
 
+2026-04-12 — Code split and UI updates:
+
+- JS split into separate files: `shared.js` (data, theme, state, navigation, utilities), `memory.js` (Memory Match), `quiz.js` (Quiz Challenge + results), `explorer.js` (Lab Explorer), `reference.js` (Reference tab). `index.html` now links these via `<script src>` tags.
+- Reference tab added: a browsable screen showing all 20 amino acids with their structures, filterable by category (Nonpolar / Polar / Positive / Negative). Each card opens a detail modal with codes, property, and hint. Users can upload a custom image per amino acid (stored in localStorage) or reset back to the SVG.
 - Light/dark mode toggle: added a button (bottom-right) to switch between dark and light themes. Preference is saved to localStorage.
 - Full-page layout: removed the max-width container cap so the game fills the entire viewport. Memory grid expanded to 6 columns with taller cards.
 - Naming correction: Aspartic Acid and Glutamic Acid renamed to Aspartate and Glutamate in the Memory Match game data, reflecting their ionised form at physiological pH.
@@ -38,6 +44,7 @@ Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartat
 - Random set cycling: the 20 amino acids are now cycled through in randomised batches of 6 with no repeats until all 20 have been seen. A "New Set" button lets players swap in a fresh batch mid-game.
 
 2026-03-22 — 3 game modes: Flashcards for studying, Quiz for multiple choice practice, and Lab Explorer — a 2D map game where you open chests to unlock amino acid challenges. All modes support user vs bot play.
+
 
 
 ## Run locally
