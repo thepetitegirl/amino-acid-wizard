@@ -1153,27 +1153,30 @@ const AMINO_ACIDS = [
 // ================================================================
 const SVG_STRUCTURES = {
 
-  // Glycine — H only
+  // Glycine — –H only
   Glycine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="55" cy="40" r="6" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.5"/>
-    <text x="55" y="70" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–H (no side chain)</text>
+    <line x1="30" y1="45" x2="44" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="50" cy="45" r="6" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.5"/>
+    <text x="55" y="72" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–H (no side chain)</text>
   </svg>`,
 
-  // Alanine — CH3: central C + 3 H
+  // Alanine — –CH₃
   Alanine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="55" y1="38" x2="55" y2="26" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="49" y1="52" x2="38" y2="60" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="61" y1="52" x2="72" y2="60" stroke="#94a3b8" stroke-width="2"/>
-    <circle cx="55" cy="45" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="55" cy="21" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
-    <circle cx="34" cy="64" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
-    <circle cx="76" cy="64" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <line x1="8" y1="45" x2="28" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="38" x2="35" y2="27" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="28" y1="51" x2="19" y2="60" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="42" y1="51" x2="51" y2="60" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="35" cy="45" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="35" cy="22" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="15" cy="64" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="55" cy="64" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
     <text x="55" y="82" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₃</text>
   </svg>`,
 
-  // Cysteine — C–S–H
+  // Cysteine — –CH₂–SH
   Cysteine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="35" y1="45" x2="50" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="8" y1="45" x2="21" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="45" x2="49" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="69" y1="45" x2="79" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <circle cx="28" cy="45" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="59" cy="45" r="10" fill="#eab308" stroke="#fde047" stroke-width="1.5"/>
@@ -1181,9 +1184,10 @@ const SVG_STRUCTURES = {
     <text x="55" y="73" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–SH</text>
   </svg>`,
 
-  // Serine — C–O–H
+  // Serine — –CH₂–OH
   Serine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="35" y1="45" x2="50" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="8" y1="45" x2="21" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="45" x2="49" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="65" y1="45" x2="75" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <circle cx="28" cy="45" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="57" cy="45" r="8" fill="#ef4444" stroke="#fca5a5" stroke-width="1.5"/>
@@ -1191,24 +1195,32 @@ const SVG_STRUCTURES = {
     <text x="55" y="73" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–OH</text>
   </svg>`,
 
-  // Lysine — C–C–C–C–N (zigzag)
-  Lysine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="14" y1="47" x2="18" y2="40" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="30" y1="40" x2="34" y2="47" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="46" y1="47" x2="50" y2="40" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="62" y1="40" x2="66" y2="47" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="78" y1="47" x2="84" y2="47" stroke="#94a3b8" stroke-width="2"/>
-    <circle cx="8" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="24" cy="36" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="40" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="56" cy="36" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="72" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="98" cy="47" r="8" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="55" y="75" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–(CH₂)₄–NH₃⁺</text>
+  // Lysine — –(CH₂)₄–NH₃⁺  (protonated at pH 7)
+  Lysine: `<svg viewBox="0 0 130 95" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="52" x2="14" y2="52" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="26" y1="49" x2="30" y2="43" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="42" y1="43" x2="46" y2="49" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="58" y1="49" x2="62" y2="43" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="74" y1="43" x2="78" y2="49" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="90" y1="52" x2="87" y2="52" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="101" y1="47" x2="108" y2="40" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="105" y1="52" x2="114" y2="52" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="101" y1="57" x2="108" y2="64" stroke="#94a3b8" stroke-width="1.5"/>
+    <circle cx="20" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="36" cy="43" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="52" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="68" cy="43" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="84" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="96" cy="52" r="9" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="112" cy="37" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="118" cy="52" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="112" cy="67" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="63" y="86" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–(CH₂)₄–NH₃⁺</text>
   </svg>`,
 
-  // Aspartate — C–C(=O)–O
+  // Aspartate — –CH₂–COO⁻ (pH 7 deprotonated)
   "Aspartate": `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="8" y1="50" x2="18" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="32" y1="50" x2="48" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="52" y1="43" x2="52" y2="30" stroke="#94a3b8" stroke-width="2"/>
     <line x1="58" y1="43" x2="58" y2="30" stroke="#94a3b8" stroke-width="2"/>
@@ -1220,8 +1232,9 @@ const SVG_STRUCTURES = {
     <text x="55" y="96" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–COO⁻</text>
   </svg>`,
 
-  // Phenylalanine — C–benzene (6 C ring)
+  // Phenylalanine — –CH₂–C₆H₅ (benzene with alternating double bonds)
   Phenylalanine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="45" x2="9" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="23" y1="45" x2="34" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="47" y1="45" x2="54" y2="31" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="54" y1="31" x2="69" y2="31" stroke="#94a3b8" stroke-width="1.8"/>
@@ -1229,8 +1242,11 @@ const SVG_STRUCTURES = {
     <line x1="76" y1="45" x2="69" y2="59" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="69" y1="59" x2="54" y2="59" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="54" y1="59" x2="47" y2="45" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="50" y1="47" x2="57" y2="33" stroke="#94a3b8" stroke-width="1.4"/>
+    <line x1="67" y1="33" x2="74" y2="47" stroke="#94a3b8" stroke-width="1.4"/>
+    <line x1="54" y1="56" x2="69" y2="56" stroke="#94a3b8" stroke-width="1.4"/>
     <circle cx="16" cy="45" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="47" cy="45" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="41" cy="45" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="54" cy="31" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="69" cy="31" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="76" cy="45" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
@@ -1239,49 +1255,60 @@ const SVG_STRUCTURES = {
     <text x="55" y="80" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–benzene</text>
   </svg>`,
 
-  // Tryptophan — C–indole (fused 6+5 ring, N in 5-ring)
-  Tryptophan: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="17" y1="56" x2="28" y2="59" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="40" y1="65" x2="40" y2="47" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="40" y1="47" x2="52" y2="35" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="52" y1="35" x2="65" y2="38" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="65" y1="38" x2="65" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="65" y1="57" x2="52" y2="65" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="52" y1="65" x2="40" y2="65" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="65" y1="38" x2="77" y2="30" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="77" y1="30" x2="88" y2="42" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="88" y1="42" x2="80" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
-    <line x1="80" y1="57" x2="65" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
-    <circle cx="10" cy="54" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="40" cy="65" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="40" cy="47" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="52" cy="35" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="65" cy="38" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="65" cy="57" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="52" cy="65" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="77" cy="30" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <circle cx="88" cy="42" r="6" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
-    <circle cx="80" cy="57" r="5.5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
-    <text x="55" y="82" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–indole (N in 5-ring)</text>
+  // Tryptophan — –CH₂–indole (N in 5-ring; double bonds shown)
+  Tryptophan: `<svg viewBox="0 0 130 95" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="57" x2="11" y2="57" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="24" y1="57" x2="32" y2="57" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="38" y1="51" x2="38" y2="43" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="38" y1="30" x2="50" y2="22" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="60" y1="22" x2="66" y2="33" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="66" y1="47" x2="66" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="60" y1="63" x2="38" y2="63" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="38" y1="63" x2="38" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="66" y1="33" x2="82" y2="26" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="82" y1="26" x2="96" y2="37" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="96" y1="37" x2="96" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="96" y1="57" x2="82" y2="68" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="82" y1="68" x2="66" y2="57" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="41" y1="51" x2="41" y2="43" stroke="#94a3b8" stroke-width="1.2"/>
+    <line x1="93" y1="40" x2="79" y2="29" stroke="#94a3b8" stroke-width="1.2"/>
+    <line x1="93" y1="54" x2="79" y2="65" stroke="#94a3b8" stroke-width="1.2"/>
+    <line x1="55" y1="18" x2="44" y2="24" stroke="#94a3b8" stroke-width="1.5"/>
+    <circle cx="17" cy="57" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="38" cy="57" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="38" cy="37" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="55" cy="22" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="40" cy="12" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="66" cy="40" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="66" cy="57" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="82" cy="26" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="96" cy="37" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="96" cy="57" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="82" cy="68" r="5" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <text x="60" y="85" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–indole (N in 5-ring)</text>
   </svg>`,
 
-  // Proline — pyrrolidine ring: N + 4 C
-  Proline: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="35" y1="46" x2="49" y2="27" stroke="#94a3b8" stroke-width="2"/>
+  // Proline — pyrrolidine ring; N protonated (NH⁺) at pH 7; bond to Cα shown
+  Proline: `<svg viewBox="0 0 110 95" xmlns="http://www.w3.org/2000/svg">
+    <line x1="5" y1="48" x2="27" y2="48" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="40" x2="49" y2="27" stroke="#94a3b8" stroke-width="2"/>
     <line x1="49" y1="27" x2="71" y2="34" stroke="#94a3b8" stroke-width="2"/>
     <line x1="71" y1="34" x2="71" y2="58" stroke="#94a3b8" stroke-width="2"/>
     <line x1="71" y1="58" x2="49" y2="65" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="49" y1="65" x2="35" y2="46" stroke="#94a3b8" stroke-width="2"/>
-    <circle cx="35" cy="46" r="8" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <line x1="49" y1="65" x2="35" y2="56" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="40" x2="35" y2="30" stroke="#94a3b8" stroke-width="1.5"/>
+    <circle cx="35" cy="48" r="8" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="35" cy="22" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
     <circle cx="49" cy="27" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="71" cy="34" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="71" cy="58" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="49" cy="65" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <text x="58" y="82" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">pyrrolidine ring</text>
+    <text x="58" y="85" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">pyrrolidine (NH⁺)</text>
   </svg>`,
 
-  // Methionine — C–C–S–C
+  // Methionine — –CH₂CH₂–S–CH₃
   Methionine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="45" x2="8" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="22" y1="45" x2="31" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="45" y1="45" x2="56" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="75" y1="45" x2="84" y2="45" stroke="#94a3b8" stroke-width="2"/>
@@ -1292,31 +1319,35 @@ const SVG_STRUCTURES = {
     <text x="55" y="73" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂CH₂–S–CH₃</text>
   </svg>`,
 
-  // Valine — central C + 2 C branches
+  // Valine — –CH(CH₃)₂
   Valine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="44" y1="41" x2="56" y2="28" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="44" y1="51" x2="56" y2="64" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="8" y1="46" x2="30" y2="46" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="44" y1="40" x2="56" y2="26" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="44" y1="52" x2="56" y2="66" stroke="#94a3b8" stroke-width="2"/>
     <circle cx="38" cy="46" r="8" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="63" cy="22" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="63" cy="70" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <text x="55" y="86" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH(CH₃)₂</text>
+    <circle cx="63" cy="20" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="63" cy="72" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <text x="55" y="87" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH(CH₃)₂</text>
   </svg>`,
 
-  // Leucine — C–C then 2 branches
+  // Leucine — –CH₂–CH(CH₃)₂
   Leucine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="46" x2="8" y2="46" stroke="#94a3b8" stroke-width="2"/>
     <line x1="22" y1="46" x2="32" y2="46" stroke="#94a3b8" stroke-width="2"/>
     <line x1="46" y1="46" x2="58" y2="46" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="65" y1="40" x2="74" y2="28" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="65" y1="52" x2="74" y2="64" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="65" y1="40" x2="74" y2="27" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="65" y1="52" x2="74" y2="65" stroke="#94a3b8" stroke-width="2"/>
     <circle cx="15" cy="46" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="39" cy="46" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="72" cy="22" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="72" cy="70" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="65" cy="46" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="79" cy="22" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="79" cy="70" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <text x="50" y="86" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–CH(CH₃)₂</text>
   </svg>`,
 
-  // Isoleucine — C(branch-up)–C–C
+  // Isoleucine — –CH(CH₃)–CH₂–CH₃
   Isoleucine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <line x1="8" y1="48" x2="20" y2="48" stroke="#94a3b8" stroke-width="2"/>
     <line x1="28" y1="40" x2="28" y2="28" stroke="#94a3b8" stroke-width="2"/>
     <line x1="35" y1="48" x2="48" y2="48" stroke="#94a3b8" stroke-width="2"/>
     <line x1="62" y1="48" x2="76" y2="48" stroke="#94a3b8" stroke-width="2"/>
@@ -1327,20 +1358,22 @@ const SVG_STRUCTURES = {
     <text x="55" y="76" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH(CH₃)–CH₂–CH₃</text>
   </svg>`,
 
-  // Threonine — C(–O–H)(–C)
+  // Threonine — –CH(OH)–CH₃ (H of OH points up)
   Threonine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
-    <line x1="35" y1="44" x2="35" y2="32" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="42" y1="24" x2="54" y2="24" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="43" y1="52" x2="58" y2="52" stroke="#94a3b8" stroke-width="2"/>
-    <circle cx="35" cy="52" r="8" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <line x1="8" y1="55" x2="27" y2="55" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="47" x2="35" y2="35" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="16" x2="35" y2="10" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="43" y1="55" x2="58" y2="55" stroke="#94a3b8" stroke-width="2"/>
+    <circle cx="35" cy="55" r="8" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="35" cy="24" r="8" fill="#ef4444" stroke="#fca5a5" stroke-width="1.5"/>
-    <circle cx="61" cy="24" r="5" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
-    <circle cx="65" cy="52" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="35" cy="6" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="65" cy="55" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <text x="55" y="78" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH(OH)–CH₃</text>
   </svg>`,
 
-  // Tyrosine — C–benzene–O–H
+  // Tyrosine — –CH₂–C₆H₄–OH (benzene with double bonds)
   Tyrosine: `<svg viewBox="0 0 130 90" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="45" x2="9" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="20" y1="45" x2="30" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="43" y1="45" x2="50" y2="31" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="50" y1="31" x2="65" y2="31" stroke="#94a3b8" stroke-width="1.8"/>
@@ -1348,10 +1381,13 @@ const SVG_STRUCTURES = {
     <line x1="72" y1="45" x2="65" y2="59" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="65" y1="59" x2="50" y2="59" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="50" y1="59" x2="43" y2="45" stroke="#94a3b8" stroke-width="1.8"/>
+    <line x1="46" y1="47" x2="53" y2="33" stroke="#94a3b8" stroke-width="1.4"/>
+    <line x1="63" y1="33" x2="70" y2="47" stroke="#94a3b8" stroke-width="1.4"/>
+    <line x1="50" y1="56" x2="65" y2="56" stroke="#94a3b8" stroke-width="1.4"/>
     <line x1="79" y1="45" x2="88" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <line x1="103" y1="45" x2="111" y2="45" stroke="#94a3b8" stroke-width="2"/>
     <circle cx="13" cy="45" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="43" cy="45" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
+    <circle cx="37" cy="45" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="50" cy="31" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="65" cy="31" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="72" cy="45" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
@@ -1362,8 +1398,9 @@ const SVG_STRUCTURES = {
     <text x="65" y="80" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–Ph–OH</text>
   </svg>`,
 
-  // Asparagine — C–C(=O)–N
+  // Asparagine — –CH₂–CONH₂
   Asparagine: `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="8" y1="50" x2="18" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="32" y1="50" x2="48" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="52" y1="43" x2="52" y2="30" stroke="#94a3b8" stroke-width="2"/>
     <line x1="58" y1="43" x2="58" y2="30" stroke="#94a3b8" stroke-width="2"/>
@@ -1375,8 +1412,9 @@ const SVG_STRUCTURES = {
     <text x="55" y="96" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–CONH₂</text>
   </svg>`,
 
-  // Glutamine — C–C–C(=O)–N
+  // Glutamine — –(CH₂)₂–CONH₂
   Glutamine: `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="5" y1="50" x2="8" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="22" y1="50" x2="35" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="49" y1="50" x2="63" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="67" y1="43" x2="67" y2="30" stroke="#94a3b8" stroke-width="2"/>
@@ -1390,8 +1428,9 @@ const SVG_STRUCTURES = {
     <text x="55" y="96" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–(CH₂)₂–CONH₂</text>
   </svg>`,
 
-  // Glutamate — C–C–C(=O)–O
+  // Glutamate — –(CH₂)₂–COO⁻ (pH 7 deprotonated)
   "Glutamate": `<svg viewBox="0 0 110 100" xmlns="http://www.w3.org/2000/svg">
+    <line x1="5" y1="50" x2="8" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="22" y1="50" x2="35" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="49" y1="50" x2="63" y2="50" stroke="#94a3b8" stroke-width="2"/>
     <line x1="67" y1="43" x2="67" y2="30" stroke="#94a3b8" stroke-width="2"/>
@@ -1405,34 +1444,42 @@ const SVG_STRUCTURES = {
     <text x="55" y="96" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–(CH₂)₂–COO⁻</text>
   </svg>`,
 
-  // Arginine — C–C–C–N–C(=N)–N (guanidinium)
-  Arginine: `<svg viewBox="0 0 110 105" xmlns="http://www.w3.org/2000/svg">
-    <line x1="14" y1="47" x2="18" y2="40" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="30" y1="40" x2="34" y2="47" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="46" y1="47" x2="50" y2="40" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="62" y1="40" x2="66" y2="47" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="67" y1="44" x2="67" y2="32" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="73" y1="44" x2="73" y2="32" stroke="#94a3b8" stroke-width="2"/>
-    <line x1="70" y1="59" x2="70" y2="72" stroke="#94a3b8" stroke-width="2"/>
-    <circle cx="8" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="24" cy="36" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="40" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="56" cy="36" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
-    <circle cx="70" cy="52" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
-    <circle cx="70" cy="26" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
-    <circle cx="70" cy="79" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
-    <text x="50" y="99" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">guanidinium group</text>
+  // Arginine — guanidinium group (fully protonated at pH 7; =NH₂⁺ shown)
+  Arginine: `<svg viewBox="0 0 115 110" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="55" x2="7" y2="55" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="19" y1="51" x2="23" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="35" y1="45" x2="39" y2="51" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="51" y1="51" x2="55" y2="45" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="67" y1="45" x2="71" y2="51" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="72" y1="49" x2="72" y2="37" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="78" y1="49" x2="78" y2="37" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="75" y1="63" x2="75" y2="76" stroke="#94a3b8" stroke-width="2"/>
+    <line x1="75" y1="30" x2="75" y2="20" stroke="#94a3b8" stroke-width="1.5"/>
+    <line x1="75" y1="83" x2="75" y2="88" stroke="#94a3b8" stroke-width="1.5"/>
+    <circle cx="13" cy="55" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="29" cy="41" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="45" cy="55" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="61" cy="41" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="75" cy="55" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <circle cx="75" cy="30" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="75" cy="83" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
+    <circle cx="75" cy="13" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <circle cx="75" cy="96" r="4" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="1.2"/>
+    <text x="57" y="108" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">guanidinium (NH₂⁺)</text>
   </svg>`,
 
-  // Histidine — C + imidazole (N–C–N–C–C ring)
+  // Histidine — –CH₂–imidazole (double bonds in ring)
   Histidine: `<svg viewBox="0 0 110 90" xmlns="http://www.w3.org/2000/svg">
+    <line x1="2" y1="56" x2="8" y2="56" stroke="#94a3b8" stroke-width="2"/>
     <line x1="22" y1="56" x2="48" y2="64" stroke="#94a3b8" stroke-width="2"/>
     <line x1="54" y1="68" x2="54" y2="46" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="54" y1="46" x2="70" y2="34" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="70" y1="34" x2="87" y2="44" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="87" y1="44" x2="82" y2="67" stroke="#94a3b8" stroke-width="1.8"/>
     <line x1="82" y1="67" x2="54" y2="68" stroke="#94a3b8" stroke-width="1.8"/>
-    <circle cx="15" cy="54" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
+    <line x1="68" y1="36" x2="85" y2="46" stroke="#94a3b8" stroke-width="1.2"/>
+    <line x1="82" y1="64" x2="56" y2="65" stroke="#94a3b8" stroke-width="1.2"/>
+    <circle cx="15" cy="56" r="7" fill="#94a3b8" stroke="#64748b" stroke-width="1.5"/>
     <circle cx="54" cy="68" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
     <circle cx="54" cy="44" r="7" fill="#60a5fa" stroke="#93c5fd" stroke-width="1.5"/>
     <circle cx="70" cy="34" r="6" fill="#94a3b8" stroke="#64748b" stroke-width="1.3"/>
@@ -1441,6 +1488,7 @@ const SVG_STRUCTURES = {
     <text x="52" y="86" text-anchor="middle" font-size="8" fill="#64748b" font-family="sans-serif">–CH₂–imidazole</text>
   </svg>`,
 };
+
 
 // ================================================================
 //  QUIZ QUESTIONS

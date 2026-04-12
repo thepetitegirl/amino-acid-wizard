@@ -17,9 +17,16 @@ Open `index.html` in any browser — no installation or setup needed.
 
 ## All 20 amino acids covered
 
-Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartic Acid, Lysine, Methionine, Valine, Leucine, Isoleucine, Threonine, Tyrosine, Asparagine, Glutamine, Glutamic Acid, Arginine, Histidine
+Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartate, Lysine, Methionine, Valine, Leucine, Isoleucine, Threonine, Tyrosine, Asparagine, Glutamine, Glutamate, Arginine, Histidine
 
 ## Last updated
+
+2026-04-12 — UI and naming updates:
+
+- Light/dark mode toggle: added a button (bottom-right) to switch between dark and light themes. Preference is saved to localStorage.
+- Full-page layout: removed the max-width container cap so the game fills the entire viewport. Memory grid expanded to 6 columns with taller cards.
+- Naming correction: Aspartic Acid and Glutamic Acid renamed to Aspartate and Glutamate in the Memory Match game data, reflecting their ionised form at physiological pH.
+- Side chain note updated to use NH₃⁺–Cα–COO⁻ (pH 7 forms) with clarification that all structures are shown at pH 7.
 
 2026-03-24 — Updates to the Memory Match game:
 
@@ -31,6 +38,7 @@ Alanine, Glycine, Serine, Cysteine, Proline, Phenylalanine, Tryptophan, Aspartic
 - Random set cycling: the 20 amino acids are now cycled through in randomised batches of 6 with no repeats until all 20 have been seen. A "New Set" button lets players swap in a fresh batch mid-game.
 
 2026-03-22 — 3 game modes: Flashcards for studying, Quiz for multiple choice practice, and Lab Explorer — a 2D map game where you open chests to unlock amino acid challenges. All modes support user vs bot play.
+
 
 ## Run locally
 
